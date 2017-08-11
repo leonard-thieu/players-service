@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<?include ..\Installer\Code\Configuration.wxi?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ComponentRules="OneToOne"?>
-  <!-- SourceDir instructs IsWiX the location of the directory that contains files for this merge module -->
-  <?define SourceDir="..\Deploy"?>
+  <?define SourceDir="..\toofz.NecroDancer.Leaderboards.PlayersService\bin\Debug"?>
+  <?define SourceDir="$(var.toofz.NecroDancer.Leaderboards.PlayersService.TargetDir)"?>
   <Module Id="InstallerMM" Language="1033" Version="1.0.0.0">
-    <Package Id="e6f2afbc-b5b0-49c7-a07a-89702b1c4361" Manufacturer="toofz" InstallerVersion="200" />
+    <Package Id="e6f2afbc-b5b0-49c7-a07a-89702b1c4361" Manufacturer="$(var.Manufacturer)" InstallerVersion="200" />
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="MergeRedirectFolder">
         <Component Id="owc73F0394A22FE8E3A382B6736AF24B1B5" Guid="5d1a8002-e826-eacb-b930-577135fd067e">
@@ -57,8 +58,8 @@
         </Component>
         <Component Id="owcF2790E5923B0B020D9E2D80974AFD905" Guid="73e30dc5-03a7-11c2-2d80-832abf4094a9">
           <File Id="owfF2790E5923B0B020D9E2D80974AFD905" Source="$(var.SourceDir)\PlayersService.exe" KeyPath="yes" />
-          <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="toofz Players Service" DisplayName="toofz Players Service" Description="Provides Steam player data." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes" />
-          <ServiceControl Id="sc85773AFFD5CA35DE4A41AC5DA3D57A58" Name="toofz Players Service" Start="install" Stop="both" Remove="both" Wait="yes" />
+          <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Retrieves player data from Steam." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes" />
+          <ServiceControl Id="sc85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" Start="install" Stop="both" Remove="both" Wait="yes" />
         </Component>
         <Component Id="owc2D54FC3E87FA631FA2CAE4A3E9B25978" Guid="fbdfbb0b-3514-90cb-a392-11f98620a178">
           <File Id="owf2D54FC3E87FA631FA2CAE4A3E9B25978" Source="$(var.SourceDir)\PlayersService.exe.config" KeyPath="yes" />
