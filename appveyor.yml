@@ -9,8 +9,8 @@ environment:
   COVERALLS_REPO_TOKEN:
     secure: 2vVn7OSCCgPnjrTHWGOEHbY/bfR6lQJEJn91QaOUJnkiqomfjua7Gbhzjg70vshE
 artifacts:
-  - path: Installer\bin\$(configuration)\toofz-players-service-v$(APPVEYOR_BUILD_VERSION).msi
-    name: toofz Players Service
+  - path: Installer\bin\$(configuration)\$(PROJECT_PACKAGE)
+    name: PlayersService
 cache:
   - packages -> **\packages.config
 notifications:
@@ -59,3 +59,9 @@ after_test:
           --opencover results.xml `
           -r $coveralls_repo_token
       }
+
+deploy:
+  - provider: Environment
+    name: production
+    on:
+      appveyor_repo_tag: true
