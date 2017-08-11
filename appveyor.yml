@@ -1,11 +1,16 @@
 version: 2.1.0.{build}
 image: Visual Studio 2017
 
+configuration:
+  - Release
+environment:
+  PROJECT: toofz.NecroDancer.Leaderboards.PlayersService
+  PROJECT_PACKAGE: toofz-players-service-v%APPVEYOR_BUILD_VERSION%.msi
+  COVERALLS_REPO_TOKEN:
+    secure: 2vVn7OSCCgPnjrTHWGOEHbY/bfR6lQJEJn91QaOUJnkiqomfjua7Gbhzjg70vshE
 artifacts:
   - path: Installer\bin\$(configuration)\toofz-players-service-v$(APPVEYOR_BUILD_VERSION).msi
     name: toofz Players Service
-configuration:
-  - Release
 cache:
   - packages -> **\packages.config
 notifications:
@@ -16,8 +21,41 @@ notifications:
 before_build:
   - appveyor-retry nuget restore -DisableParallelProcessing
 build:
-  project: toofz.NecroDancer.Leaderboards.PlayersService.sln
+  project: $(PROJECT).sln
   verbosity: minimal
 
 test_script:
-  - vstest.console /logger:Appveyor "toofz.NecroDancer.Leaderboards.PlayersService.Tests\bin\%CONFIGURATION%\toofz.NecroDancer.Leaderboards.PlayersService.Tests.dll"
+  - ps: |
+      $project = $env:PROJECT
+      $configuration = $env:CONFIGURATION
+
+      [xml]$xml = Get-Content "$project.Tests\packages.config"
+      $version = ($xml.packages.package | ? { $_.id -eq 'OpenCover' }).version
+
+      & "packages\OpenCover.$version\tools\OpenCover.Console.exe" `
+        -register:user `
+        -target:'vstest.console.exe' `
+        -targetargs:".\$project.Tests\bin\$configuration\$project.Tests.dll" `
+        -filter:'+[PlayersService*]*'
+after_test:
+  - ps: |
+      $pr = $env:APPVEYOR_PULL_REQUEST_NUMBER
+      $coveralls_repo_token = $env:COVERALLS_REPO_TOKEN
+
+      if ($pr -ne '') {
+        $msg = 'The environment variable "COVERALLS_REPO_TOKEN" is a secure environment variable. ' + `
+               'Secure environment variables are not available during pull request builds. ' + `
+               'Code coverage results were not uploaded.'
+        Write-Output $msg
+      } elseif ($coveralls_repo_token -eq '') {
+        $msg = 'The environment variable "COVERALLS_REPO_TOKEN" is not set. ' + `
+               'Code coverage results were not uploaded.'
+        Write-Warning $msg
+      } else {
+        [xml]$xml = Get-Content "$env:PROJECT.Tests\packages.config"
+        $version = ($xml.packages.package | ? { $_.id -eq 'coveralls.io' }).version
+
+        & "packages\coveralls.io.$version\tools\coveralls.net.exe" `
+          --opencover results.xml `
+          -r $coveralls_repo_token
+      }
