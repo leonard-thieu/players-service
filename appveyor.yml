@@ -8,6 +8,8 @@ environment:
   PROJECT_PACKAGE: toofz-players-service-v%APPVEYOR_BUILD_VERSION%.msi
   COVERALLS_REPO_TOKEN:
     secure: 2vVn7OSCCgPnjrTHWGOEHbY/bfR6lQJEJn91QaOUJnkiqomfjua7Gbhzjg70vshE
+  COVERALLS_SERVICE_NAME: appveyor
+  COVERALLS_SERVICE_JOB_ID: '%APPVEYOR_JOB_ID%'
 artifacts:
   - path: Installer\bin\$(configuration)\$(PROJECT_PACKAGE)
     name: PlayersService
