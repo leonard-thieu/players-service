@@ -7,13 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "toofz.NecroDancer.Leaderboa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "toofz.NecroDancer.Leaderboards.PlayersService.Tests", "toofz.NecroDancer.Leaderboards.PlayersService.Tests\toofz.NecroDancer.Leaderboards.PlayersService.Tests.csproj", "{3F602AB5-05E8-4A2D-B84A-F76EE07BE5EE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solutions files", "Solutions files", "{FCAB0D9D-7F36-4A0A-8FD2-8CD7698B8DBB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solutions Items", "Solutions Items", "{FCAB0D9D-7F36-4A0A-8FD2-8CD7698B8DBB}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		NuGet.Config = NuGet.Config
 		README.md = README.md
-		Submit-CodeCoverageResults.ps1 = Submit-CodeCoverageResults.ps1
-		Test-Project.ps1 = Test-Project.ps1
 	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallerMM", "InstallerMM\InstallerMM.wixproj", "{29822A3A-CFDB-4A20-B5F5-724A763548C1}"
