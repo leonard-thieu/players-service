@@ -2,8 +2,8 @@
 <?include ..\Installer\Code\Configuration.wxi?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ComponentRules="OneToOne"?>
-  <?define SourceDir="..\toofz.NecroDancer.Leaderboards.PlayersService\bin\Debug"?>
-  <?define SourceDir="$(var.toofz.NecroDancer.Leaderboards.PlayersService.TargetDir)"?>
+  <?define SourceDir="..\PlayersService\bin\Debug"?>
+  <?define SourceDir="$(var.PlayersService.TargetDir)"?>
   <Module Id="InstallerMM" Language="1033" Version="1.0.0.0">
     <Package Id="e6f2afbc-b5b0-49c7-a07a-89702b1c4361" Manufacturer="$(var.Manufacturer)" InstallerVersion="200" />
     <Directory Id="TARGETDIR" Name="SourceDir">

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "toofz.NecroDancer.Leaderboards.PlayersService", "toofz.NecroDancer.Leaderboards.PlayersService\toofz.NecroDancer.Leaderboards.PlayersService.csproj", "{714C9B00-9392-4F2A-872C-3FE575A23D12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayersService", "PlayersService\PlayersService.csproj", "{714C9B00-9392-4F2A-872C-3FE575A23D12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "toofz.NecroDancer.Leaderboards.PlayersService.Tests", "toofz.NecroDancer.Leaderboards.PlayersService.Tests\toofz.NecroDancer.Leaderboards.PlayersService.Tests.csproj", "{3F602AB5-05E8-4A2D-B84A-F76EE07BE5EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayersService.Tests", "PlayersService.Tests\PlayersService.Tests.csproj", "{3F602AB5-05E8-4A2D-B84A-F76EE07BE5EE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FCAB0D9D-7F36-4A0A-8FD2-8CD7698B8DBB}"
 	ProjectSection(SolutionItems) = preProject
