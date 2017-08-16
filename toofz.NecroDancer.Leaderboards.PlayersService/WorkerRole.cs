@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using CredentialManagement;
 using log4net;
 using toofz.NecroDancer.Leaderboards.Services.Common;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
@@ -39,10 +40,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
-            oAuth2Handler.UserName = Util.GetEnvVar("PlayersUserName");
-            oAuth2Handler.Password = Util.GetEnvVar("PlayersPassword");
             var apiBaseAddress = Util.GetEnvVar("toofzApiBaseAddress");
-            var steamWebApiKey = Util.GetEnvVar("SteamWebApiKey");
+
+            string steamWebApiKey;
+            using (var cred = new Credential { Target = "toofz/SteamWebApiKey" })
+            {
+                if (!cred.Load())
+                {
+                    throw new InvalidOperationException("Could not load credentials for 'toofz/SteamWebApiKey'.");
+                }
+
+                steamWebApiKey = cred.Password;
+            }
+
+            using (var cred = new Credential { Target = "toofz/PlayersService" })
+            {
+                if (!cred.Load())
+                {
+                    throw new InvalidOperationException("Could not load credentials for 'toofz/PlayersService'.");
+                }
+
+                oAuth2Handler.UserName = cred.Username;
+                oAuth2Handler.Password = cred.Password;
+            }
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
