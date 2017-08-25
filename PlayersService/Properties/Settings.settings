@@ -1,0 +1,33 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="toofz.NecroDancer.Leaderboards.PlayersService.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Version" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="UpdateInterval" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">00:00:30</Value>
+    </Setting>
+    <Setting Name="DelayBeforeGC" Type="System.TimeSpan" Scope="User">
+      <Value Profile="(Default)">00:00:05</Value>
+    </Setting>
+    <Setting Name="PlayersPerUpdate" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="ToofzApiBaseAddress" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://localhost:44300/</Value>
+    </Setting>
+    <Setting Name="PlayersUserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">PlayersService</Value>
+    </Setting>
+    <Setting Name="PlayersPassword" GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SteamWebApiKey" GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PlayersInstrumentationKey" GenerateDefaultValueInCode="false" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>

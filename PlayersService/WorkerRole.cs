@@ -7,25 +7,29 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CredentialManagement;
 using log4net;
-using toofz.NecroDancer.Leaderboards.Services;
+using Microsoft.ApplicationInsights;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.toofz;
+using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    sealed class WorkerRole : WorkerRoleBase<PlayerSettings>
+    sealed class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole() : base("toofz Players Service") { }
+        public WorkerRole() : base("players") { }
 
+        TelemetryClient telemetryClient;
         OAuth2Handler oAuth2Handler;
         HttpMessageHandler apiHandlers;
 
-        protected override void OnStartOverride()
+        public override IPlayersSettings Settings => Properties.Settings.Default;
+
+        protected override void OnStart(string[] args)
         {
+            telemetryClient = new TelemetryClient();
             oAuth2Handler = new OAuth2Handler();
             apiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
             {
@@ -36,46 +40,41 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                 new HttpRequestStatusHandler(),
                 oAuth2Handler,
             });
+
+            base.OnStart(args);
         }
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
-            var apiBaseAddress = Util.GetEnvVar("toofzApiBaseAddress");
-
-            string steamWebApiKey;
-            using (var cred = new Credential { Target = "toofz/SteamWebApiKey" })
+            if (Settings.SteamWebApiKey == null)
             {
-                if (!cred.Load())
-                {
-                    throw new InvalidOperationException("Could not load credentials for 'toofz/SteamWebApiKey'.");
-                }
-
-                steamWebApiKey = cred.Password;
+                throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
             }
+            var steamWebApiKey = Settings.SteamWebApiKey;
 
-            using (var cred = new Credential { Target = "toofz/PlayersService" })
+            if (string.IsNullOrEmpty(Settings.PlayersUserName))
             {
-                if (!cred.Load())
-                {
-                    throw new InvalidOperationException("Could not load credentials for 'toofz/PlayersService'.");
-                }
-
-                oAuth2Handler.UserName = cred.Username;
-                oAuth2Handler.Password = cred.Password;
+                throw new InvalidOperationException($"{nameof(Settings.PlayersUserName)} is not set.");
             }
+            oAuth2Handler.UserName = Settings.PlayersUserName;
+            if (Settings.PlayersPassword == null)
+            {
+                throw new InvalidOperationException($"{nameof(Settings.PlayersPassword)} is not set.");
+            }
+            oAuth2Handler.Password = Settings.PlayersPassword.Decrypt();
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
                 new LoggingHandler(),
-                new SteamWebApiTransientFaultHandler(Application.TelemetryClient),
+                new SteamWebApiTransientFaultHandler(telemetryClient),
             });
 
             using (var toofzApiClient = new ToofzApiClient(apiHandlers))
             using (var steamWebApiClient = new SteamWebApiClient(steamApiHandlers))
             {
-                toofzApiClient.BaseAddress = new Uri(apiBaseAddress);
+                toofzApiClient.BaseAddress = new Uri(Settings.ToofzApiBaseAddress);
 
-                steamWebApiClient.SteamWebApiKey = steamWebApiKey;
+                steamWebApiClient.SteamWebApiKey = steamWebApiKey.Decrypt();
 
                 await UpdatePlayersAsync(
                     toofzApiClient,
