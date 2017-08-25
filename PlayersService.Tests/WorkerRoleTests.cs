@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.toofz;
-using toofz.TestsShared;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
@@ -23,17 +22,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
                 var mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
 
-                // Act
-                var ex = await Record.ExceptionAsync(() =>
+                // Act -> Assert
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
                 {
                     return workerRole.UpdatePlayersAsync(
                         null,
                         mockSteamWebApiClient.Object,
                         1);
                 });
-
-                // Assert
-                Assert.IsInstanceOfType(ex, typeof(ArgumentNullException));
             }
 
             [TestMethod]
@@ -44,21 +40,18 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
 
-                // Act
-                var ex = await Record.ExceptionAsync(() =>
+                // Act -> Assert
+                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
                 {
                     return workerRole.UpdatePlayersAsync(
                         mockIToofzApiClient.Object,
                         null,
                         1);
                 });
-
-                // Assert
-                Assert.IsInstanceOfType(ex, typeof(ArgumentNullException));
             }
 
             [TestMethod]
-            public async Task NegativeLimit_ThrowsArgumentOutOfRangeException()
+            public async Task LimitIsNegative_ThrowsArgumentOutOfRangeException()
             {
                 // Arrange
                 var workerRole = new WorkerRole();
@@ -66,21 +59,18 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
                 var mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
 
-                // Act
-                var ex = await Record.ExceptionAsync(() =>
+                // Act -> Assert
+                await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(() =>
                 {
                     return workerRole.UpdatePlayersAsync(
                         mockIToofzApiClient.Object,
                         mockSteamWebApiClient.Object,
                         -1);
                 });
-
-                // Assert
-                Assert.IsInstanceOfType(ex, typeof(ArgumentOutOfRangeException));
             }
 
             [TestMethod]
-            public async Task ValidParams_UpdatesPlayers()
+            public async Task UpdatesPlayers()
             {
                 // Arrange
                 var workerRole = new WorkerRole();
