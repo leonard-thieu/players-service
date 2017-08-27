@@ -19,13 +19,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole() : base("players") { }
+        public WorkerRole() : base("players", Properties.Settings.Default) { }
 
         TelemetryClient telemetryClient;
         OAuth2Handler oAuth2Handler;
         HttpMessageHandler apiHandlers;
-
-        public override IPlayersSettings Settings => Properties.Settings.Default;
 
         protected override void OnStart(string[] args)
         {
