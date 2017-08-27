@@ -4,11 +4,25 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
     public interface IPlayersSettings : ISettings
     {
+        /// <summary>
+        /// The number of players to update.
+        /// </summary>
         int PlayersPerUpdate { get; set; }
+        /// <summary>
+        /// The base address of toofz API.
+        /// </summary>
         string ToofzApiBaseAddress { get; set; }
-        string PlayersUserName { get; set; }
-        EncryptedSecret PlayersPassword { get; set; }
+        /// <summary>
+        /// The user name used to log on to toofz API.
+        /// </summary>
+        string ToofzApiUserName { get; set; }
+        /// <summary>
+        /// The password used to log on to toofz API.
+        /// </summary>
+        EncryptedSecret ToofzApiPassword { get; set; }
+        /// <summary>
+        /// A Steam Web API key.
+        /// </summary>
         EncryptedSecret SteamWebApiKey { get; set; }
-        string PlayersInstrumentationKey { get; set; }
     }
 }

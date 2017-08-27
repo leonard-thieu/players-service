@@ -9,7 +9,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
     sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {
-        public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter) : base(inReader, outWriter, errorWriter) { }
+        public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter, int iterations) :
+            base(inReader, outWriter, errorWriter)
+        {
+            this.iterations = iterations;
+        }
+
+        readonly int iterations;
 
         protected override string EntryAssemblyFileName { get; } = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
 
@@ -19,10 +25,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             optionSet.Add("players=", GetDescription(settingsType, nameof(Settings.PlayersPerUpdate)), (int players) => options.PlayersPerUpdate = players);
             optionSet.Add("toofz=", GetDescription(settingsType, nameof(Settings.ToofzApiBaseAddress)), api => options.ToofzApiBaseAddress = api);
-            optionSet.Add("username=", GetDescription(settingsType, nameof(Settings.PlayersUserName)), username => options.PlayersUserName = username);
-            optionSet.Add("password:", GetDescription(settingsType, nameof(Settings.PlayersPassword)), password => options.PlayersPassword = password);
+            optionSet.Add("username=", GetDescription(settingsType, nameof(Settings.ToofzApiUserName)), username => options.ToofzApiUserName = username);
+            optionSet.Add("password:", GetDescription(settingsType, nameof(Settings.ToofzApiPassword)), password => options.ToofzApiPassword = password);
             optionSet.Add("apikey:", GetDescription(settingsType, nameof(Settings.SteamWebApiKey)), apikey => options.SteamWebApiKey = apikey);
-            optionSet.Add("ikey=", GetDescription(settingsType, nameof(Settings.PlayersInstrumentationKey)), key => options.PlayersInstrumentationKey = key);
         }
 
         protected override void OnParsed(PlayersOptions options, IPlayersSettings settings)
@@ -31,82 +36,64 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             #region PlayersPerUpdate
 
-            if (options.PlayersPerUpdate != null)
+            var playersPerUpdate = options.PlayersPerUpdate;
+            if (playersPerUpdate != null)
             {
-                settings.PlayersPerUpdate = options.PlayersPerUpdate.Value;
+                settings.PlayersPerUpdate = playersPerUpdate.Value;
             }
 
             #endregion
 
             #region ToofzApiBaseAddress
 
-            if (!string.IsNullOrEmpty(options.ToofzApiBaseAddress))
+            var toofzApiBaseAddress = options.ToofzApiBaseAddress;
+            if (!string.IsNullOrEmpty(toofzApiBaseAddress))
             {
-                settings.ToofzApiBaseAddress = options.ToofzApiBaseAddress;
+                settings.ToofzApiBaseAddress = toofzApiBaseAddress;
             }
 
             #endregion
 
-            #region PlayersUserName
+            #region ToofzApiUserName
 
-            if (!string.IsNullOrEmpty(options.PlayersUserName))
+            var toofzApiUserName = options.ToofzApiUserName;
+            if (!string.IsNullOrEmpty(toofzApiUserName))
             {
-                settings.PlayersUserName = options.PlayersUserName;
+                settings.ToofzApiUserName = toofzApiUserName;
             }
-
-            while (string.IsNullOrEmpty(settings.PlayersUserName))
+            else if (string.IsNullOrEmpty(settings.ToofzApiUserName))
             {
-                OutWriter.Write("toofz API user name: ");
-                settings.PlayersUserName = InReader.ReadLine();
+                settings.ToofzApiUserName = ReadOption("toofz API user name");
             }
 
             #endregion
 
-            #region PlayersPassword
+            #region ToofzApiPassword
 
-            if (!string.IsNullOrEmpty(options.PlayersPassword))
+            var toofzApiPassword = options.ToofzApiPassword;
+            if (ShouldPromptForRequiredSetting(toofzApiPassword, settings.ToofzApiPassword))
             {
-                settings.PlayersPassword = new EncryptedSecret(options.PlayersPassword);
+                toofzApiPassword = ReadOption("toofz API password");
             }
 
-            // When PlayersPassword == null, the user has indicated that they wish to be prompted to enter the password.
-            while (settings.PlayersPassword == null || options.PlayersPassword == null)
+            if (toofzApiPassword != "")
             {
-                OutWriter.Write("toofz API password: ");
-                options.PlayersPassword = InReader.ReadLine();
-                if (!string.IsNullOrEmpty(options.PlayersPassword))
-                {
-                    settings.PlayersPassword = new EncryptedSecret(options.PlayersPassword);
-                }
+                settings.ToofzApiPassword = new EncryptedSecret(toofzApiPassword, iterations);
             }
 
             #endregion
 
             #region SteamWebApiKey
 
-            if (!string.IsNullOrEmpty(options.SteamWebApiKey))
+            var steamWebApiKey = options.SteamWebApiKey;
+            if (ShouldPromptForRequiredSetting(steamWebApiKey, settings.SteamWebApiKey))
             {
-                settings.SteamWebApiKey = new EncryptedSecret(options.SteamWebApiKey);
+                steamWebApiKey = ReadOption("Steam Web API key");
             }
 
-            // When SteamWebApiKey == null, the user has indicated that they wish to be prompted to enter the password.
-            while (settings.SteamWebApiKey == null || options.SteamWebApiKey == null)
+            if (steamWebApiKey != "")
             {
-                OutWriter.Write("Steam Web API key: ");
-                options.SteamWebApiKey = InReader.ReadLine();
-                if (!string.IsNullOrEmpty(options.SteamWebApiKey))
-                {
-                    settings.SteamWebApiKey = new EncryptedSecret(options.SteamWebApiKey);
-                }
-            }
-
-            #endregion
-
-            #region PlayersInstrumentationKey
-
-            if (!string.IsNullOrEmpty(options.PlayersInstrumentationKey))
-            {
-                settings.PlayersInstrumentationKey = options.PlayersInstrumentationKey;
+                settings.SteamWebApiKey = new EncryptedSecret(steamWebApiKey, iterations);
             }
 
             #endregion

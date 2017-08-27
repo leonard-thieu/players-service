@@ -12,10 +12,17 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(Program));
 
+        /// <summary>
+        /// The main entry point of the application.
+        /// </summary>
+        /// <param name="args">Arguments passed in.</param>
+        /// <returns>
+        /// 0 - The application ran successfully.
+        /// 1 - There was an error parsing <paramref name="args"/>.
+        /// </returns>
         static int Main(string[] args)
         {
             Log.Debug("Initialized logging.");
-            Secrets.Iterations = 200000;
 
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             var settings = Settings.Default;
@@ -23,17 +30,18 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             // Args are only allowed while running as a console as they may require user input.
             if (Environment.UserInteractive && args.Any())
             {
-                var parser = new PlayersArgsParser(Console.In, Console.Out, Console.Error);
+                var parser = new PlayersArgsParser(Console.In, Console.Out, Console.Error, settings.KeyDerivationIterations);
 
                 return parser.Parse(args, settings);
             }
 
-            var instrumentationKey = settings.PlayersInstrumentationKey;
-            if (!string.IsNullOrEmpty(instrumentationKey)) { TelemetryConfiguration.Active.InstrumentationKey = instrumentationKey; }
+            if (string.IsNullOrEmpty(settings.InstrumentationKey))
+            {
+                Log.Warn($"The setting 'InstrumentationKey' is not set. Telemetry is disabled.");
+            }
             else
             {
-                Log.Warn($"The setting 'PlayersInstrumentationKey' is not set. Telemetry is disabled.");
-                TelemetryConfiguration.Active.DisableTelemetry = true;
+                TelemetryConfiguration.Active.InstrumentationKey = settings.InstrumentationKey;
             }
 
             Application.Run<WorkerRole, IPlayersSettings>();

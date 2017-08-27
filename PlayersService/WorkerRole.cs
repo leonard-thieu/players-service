@@ -52,16 +52,16 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             }
             var steamWebApiKey = Settings.SteamWebApiKey;
 
-            if (string.IsNullOrEmpty(Settings.PlayersUserName))
+            if (string.IsNullOrEmpty(Settings.ToofzApiUserName))
             {
-                throw new InvalidOperationException($"{nameof(Settings.PlayersUserName)} is not set.");
+                throw new InvalidOperationException($"{nameof(Settings.ToofzApiUserName)} is not set.");
             }
-            oAuth2Handler.UserName = Settings.PlayersUserName;
-            if (Settings.PlayersPassword == null)
+            oAuth2Handler.UserName = Settings.ToofzApiUserName;
+            if (Settings.ToofzApiPassword == null)
             {
-                throw new InvalidOperationException($"{nameof(Settings.PlayersPassword)} is not set.");
+                throw new InvalidOperationException($"{nameof(Settings.ToofzApiPassword)} is not set.");
             }
-            oAuth2Handler.Password = Settings.PlayersPassword.Decrypt();
+            oAuth2Handler.Password = Settings.ToofzApiPassword.Decrypt();
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
@@ -92,9 +92,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (toofzApiClient == null)
-                throw new ArgumentNullException(nameof(toofzApiClient), $"{nameof(toofzApiClient)} is null.");
+                throw new ArgumentNullException(nameof(toofzApiClient));
             if (steamWebApiClient == null)
-                throw new ArgumentNullException(nameof(steamWebApiClient), $"{nameof(steamWebApiClient)} is null.");
+                throw new ArgumentNullException(nameof(steamWebApiClient));
             if (limit <= 0)
                 throw new ArgumentOutOfRangeException(nameof(limit));
 
