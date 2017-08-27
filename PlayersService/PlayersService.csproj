@@ -117,6 +117,9 @@
     <Reference Include="toofz.Services, Version=7.0.1.133, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\toofz.Services.7.0.1\lib\net45\toofz.Services.dll</HintPath>
     </Reference>
+    <Reference Include="toofz.Telemetry, Version=1.0.3.15, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.Telemetry.1.0.3\lib\net45\toofz.Telemetry.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
