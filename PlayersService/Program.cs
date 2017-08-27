@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using log4net;
@@ -20,6 +21,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// 0 - The application ran successfully.
         /// 1 - There was an error parsing <paramref name="args"/>.
         /// </returns>
+        [ExcludeFromCodeCoverage]
         static int Main(string[] args)
         {
             var settings = Settings.Default;
