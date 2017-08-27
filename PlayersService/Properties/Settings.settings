@@ -2,31 +2,34 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="toofz.NecroDancer.Leaderboards.PlayersService.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Version" Type="System.Int32" Scope="Application">
+    <Setting Name="Version" Description="The version of the settings file format." Type="System.Int32" Scope="Application">
       <Value Profile="(Default)">1</Value>
     </Setting>
-    <Setting Name="UpdateInterval" Type="System.TimeSpan" Scope="User">
+    <Setting Name="UpdateInterval" Description="The minimum amount of time that should pass between each cycle." Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:00:30</Value>
     </Setting>
-    <Setting Name="DelayBeforeGC" Type="System.TimeSpan" Scope="User">
+    <Setting Name="DelayBeforeGC" Description="The amount of time to wait after a cycle to perform garbage collection." Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:00:05</Value>
     </Setting>
-    <Setting Name="PlayersPerUpdate" Type="System.Int32" Scope="User">
+    <Setting Name="InstrumentationKey" Description="An Application Insights instrumentation key." GenerateDefaultValueInCode="false" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KeyDerivationIterations" Description="The number of rounds to execute a key derivation function." Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">20000</Value>
+    </Setting>
+    <Setting Name="PlayersPerUpdate" Description="The number of players to update." Type="System.Int32" Scope="User">
       <Value Profile="(Default)">500</Value>
     </Setting>
-    <Setting Name="ToofzApiBaseAddress" Type="System.String" Scope="User">
+    <Setting Name="ToofzApiBaseAddress" Description="The base address of toofz API." Type="System.String" Scope="User">
       <Value Profile="(Default)">https://localhost:44300/</Value>
     </Setting>
-    <Setting Name="PlayersUserName" Type="System.String" Scope="User">
+    <Setting Name="ToofzApiUserName" Description="The user name used to log on to toofz API." Type="System.String" Scope="User">
       <Value Profile="(Default)">PlayersService</Value>
     </Setting>
-    <Setting Name="PlayersPassword" GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
+    <Setting Name="ToofzApiPassword" Description="The password used to log on to toofz API." GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="SteamWebApiKey" GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="PlayersInstrumentationKey" GenerateDefaultValueInCode="false" Type="System.String" Scope="User">
+    <Setting Name="SteamWebApiKey" Description="A Steam Web API key." GenerateDefaultValueInCode="false" Type="toofz.EncryptedSecret" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

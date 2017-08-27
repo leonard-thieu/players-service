@@ -23,7 +23,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// The version of the settings file format.
+        /// </summary>
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The version of the settings file format.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int Version {
@@ -32,7 +36,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// The minimum amount of time that should pass between each cycle.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The minimum amount of time that should pass between each cycle.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("00:00:30")]
         public global::System.TimeSpan UpdateInterval {
@@ -44,7 +52,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// The amount of time to wait after a cycle to perform garbage collection.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The amount of time to wait after a cycle to perform garbage collection.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("00:00:05")]
         public global::System.TimeSpan DelayBeforeGC {
@@ -56,7 +68,42 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// An Application Insights instrumentation key.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("An Application Insights instrumentation key.")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public string InstrumentationKey {
+            get {
+                return ((string)(this["InstrumentationKey"]));
+            }
+            set {
+                this["InstrumentationKey"] = value;
+            }
+        }
+        
+        /// <summary>
+        /// The number of rounds to execute a key derivation function.
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The number of rounds to execute a key derivation function.")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20000")]
+        public int KeyDerivationIterations {
+            get {
+                return ((int)(this["KeyDerivationIterations"]));
+            }
+            set {
+                this["KeyDerivationIterations"] = value;
+            }
+        }
+        
+        /// <summary>
+        /// The number of players to update.
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The number of players to update.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("500")]
         public int PlayersPerUpdate {
@@ -68,7 +115,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// The base address of toofz API.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The base address of toofz API.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("https://localhost:44300/")]
         public string ToofzApiBaseAddress {
@@ -80,30 +131,42 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
         }
         
+        /// <summary>
+        /// The user name used to log on to toofz API.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The user name used to log on to toofz API.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("PlayersService")]
-        public string PlayersUserName {
+        public string ToofzApiUserName {
             get {
-                return ((string)(this["PlayersUserName"]));
+                return ((string)(this["ToofzApiUserName"]));
             }
             set {
-                this["PlayersUserName"] = value;
+                this["ToofzApiUserName"] = value;
             }
         }
         
+        /// <summary>
+        /// The password used to log on to toofz API.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The password used to log on to toofz API.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::toofz.EncryptedSecret PlayersPassword {
+        public global::toofz.EncryptedSecret ToofzApiPassword {
             get {
-                return ((global::toofz.EncryptedSecret)(this["PlayersPassword"]));
+                return ((global::toofz.EncryptedSecret)(this["ToofzApiPassword"]));
             }
             set {
-                this["PlayersPassword"] = value;
+                this["ToofzApiPassword"] = value;
             }
         }
         
+        /// <summary>
+        /// A Steam Web API key.
+        /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("A Steam Web API key.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::toofz.EncryptedSecret SteamWebApiKey {
             get {
@@ -111,17 +174,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
             set {
                 this["SteamWebApiKey"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public string PlayersInstrumentationKey {
-            get {
-                return ((string)(this["PlayersInstrumentationKey"]));
-            }
-            set {
-                this["PlayersInstrumentationKey"] = value;
             }
         }
     }
