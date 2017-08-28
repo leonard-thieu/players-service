@@ -1,6 +1,6 @@
 ﻿using toofz.Services;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties
 {
     interface IPlayersSettings : ISettings
     {
