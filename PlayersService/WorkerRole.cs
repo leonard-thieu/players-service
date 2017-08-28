@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Microsoft.ApplicationInsights;
+using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.toofz;
 using toofz.Services;
@@ -19,7 +20,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole() : base("players", Properties.Settings.Default) { }
+        public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
 
         TelemetryClient telemetryClient;
         OAuth2Handler oAuth2Handler;
@@ -107,7 +108,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     .ConfigureAwait(false);
                 var steamIds = (from p in response.players
                                 select p.id)
-                                .ToList();
+                               .ToList();
 
                 var players = new ConcurrentBag<Player>();
                 using (var download = new DownloadNotifier(Log, "players"))

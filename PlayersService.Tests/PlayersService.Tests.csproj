@@ -124,25 +124,30 @@
     <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
-    <Reference Include="toofz, Version=6.1.0.161, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\toofz.6.1.0\lib\net45\toofz.dll</HintPath>
+    <Reference Include="toofz, Version=6.2.0.163, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.6.2.0\lib\net45\toofz.dll</HintPath>
     </Reference>
     <Reference Include="toofz.NecroDancer.Leaderboards, Version=4.0.1.88, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\toofz.NecroDancer.Leaderboards.4.0.1\lib\net45\toofz.NecroDancer.Leaderboards.dll</HintPath>
     </Reference>
-    <Reference Include="toofz.Services, Version=7.0.1.133, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\toofz.Services.7.0.1\lib\net45\toofz.Services.dll</HintPath>
+    <Reference Include="toofz.Services, Version=8.0.0.139, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.Services.8.0.0\lib\net45\toofz.Services.dll</HintPath>
     </Reference>
     <Reference Include="toofz.TestsShared, Version=2.0.2.64, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\toofz.TestsShared.2.0.2\lib\net45\toofz.TestsShared.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PlayersService\PlayersService.csproj">
+      <Project>{714c9b00-9392-4f2a-872c-3fe575a23d12}</Project>
+      <Name>PlayersService</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="ApplicationInsights.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config">
@@ -152,18 +157,8 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="PlayersArgsParserTests.cs" />
-    <Compile Include="ProgramTests.cs" />
     <Compile Include="SimplePlayersSettings.cs" />
     <Compile Include="WorkerRoleTests.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PlayersService\PlayersService.csproj">
-      <Project>{714c9b00-9392-4f2a-872c-3fe575a23d12}</Project>
-      <Name>PlayersService</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

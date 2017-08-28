@@ -18,7 +18,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task ApiClientIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
-                var workerRole = new WorkerRole();
+                var settings = new SimplePlayersSettings();
+                var workerRole = new WorkerRole(settings);
 
                 var mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
 
@@ -36,7 +37,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task SteamWebApiClientIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
-                var workerRole = new WorkerRole();
+                var settings = new SimplePlayersSettings();
+                var workerRole = new WorkerRole(settings);
 
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
 
@@ -54,7 +56,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task LimitIsNegative_ThrowsArgumentOutOfRangeException()
             {
                 // Arrange
-                var workerRole = new WorkerRole();
+                var settings = new SimplePlayersSettings();
+                var workerRole = new WorkerRole(settings);
 
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
                 var mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
@@ -73,7 +76,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task UpdatesPlayers()
             {
                 // Arrange
-                var workerRole = new WorkerRole();
+                var settings = new SimplePlayersSettings();
+                var workerRole = new WorkerRole(settings);
 
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
                 mockIToofzApiClient
