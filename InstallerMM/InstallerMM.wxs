@@ -102,6 +102,5 @@
         </Component>
       </Directory>
     </Directory>
-    <ComponentGroupRef Id="Custom" />
   </Module>
 </Wix>
