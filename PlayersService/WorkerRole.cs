@@ -23,21 +23,21 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
 
         TelemetryClient telemetryClient;
-        OAuth2Handler oAuth2Handler;
-        HttpMessageHandler apiHandlers;
+        OAuth2Handler toofzOAuth2Handler;
+        HttpMessageHandler toofzApiHandlers;
 
         protected override void OnStart(string[] args)
         {
             telemetryClient = new TelemetryClient();
-            oAuth2Handler = new OAuth2Handler();
-            apiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
+            toofzOAuth2Handler = new OAuth2Handler();
+            toofzApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
             }, new DelegatingHandler[]
             {
                 new LoggingHandler(),
                 new HttpRequestStatusHandler(),
-                oAuth2Handler,
+                toofzOAuth2Handler,
             });
 
             base.OnStart(args);
@@ -55,12 +55,12 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             {
                 throw new InvalidOperationException($"{nameof(Settings.ToofzApiUserName)} is not set.");
             }
-            oAuth2Handler.UserName = Settings.ToofzApiUserName;
+            toofzOAuth2Handler.UserName = Settings.ToofzApiUserName;
             if (Settings.ToofzApiPassword == null)
             {
                 throw new InvalidOperationException($"{nameof(Settings.ToofzApiPassword)} is not set.");
             }
-            oAuth2Handler.Password = Settings.ToofzApiPassword.Decrypt();
+            toofzOAuth2Handler.Password = Settings.ToofzApiPassword.Decrypt();
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
@@ -68,7 +68,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                 new SteamWebApiTransientFaultHandler(telemetryClient),
             });
 
-            using (var toofzApiClient = new ToofzApiClient(apiHandlers))
+            using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers))
             using (var steamWebApiClient = new SteamWebApiClient(steamApiHandlers))
             {
                 toofzApiClient.BaseAddress = new Uri(Settings.ToofzApiBaseAddress);
