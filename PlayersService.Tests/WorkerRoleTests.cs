@@ -82,10 +82,10 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var mockIToofzApiClient = new Mock<IToofzApiClient>();
                 mockIToofzApiClient
                     .Setup(toofzApiClient => toofzApiClient.GetPlayersAsync(It.IsAny<GetPlayersParams>(), It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(new Players()));
+                    .Returns(Task.FromResult(new PlayersEnvelope()));
                 mockIToofzApiClient
                     .Setup(toofzApiClient => toofzApiClient.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(new BulkStore()));
+                    .Returns(Task.FromResult(new BulkStoreDTO()));
 
                 var mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
 
