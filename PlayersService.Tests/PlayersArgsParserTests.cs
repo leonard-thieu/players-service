@@ -35,7 +35,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 parser.Parse(args, settings);
 
                 // Assert
-                AssertHelper.NormalizedAreEqual(@"
+                Assert.That.NormalizedAreEqual(@"
 Usage: PlayersService.exe [options]
 
 options:

@@ -28,15 +28,23 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         protected override void OnStart(string[] args)
         {
+            if (string.IsNullOrEmpty(Settings.ToofzApiUserName))
+                throw new InvalidOperationException($"{nameof(Settings.ToofzApiUserName)} is not set.");
+            if (Settings.ToofzApiPassword == null)
+                throw new InvalidOperationException($"{nameof(Settings.ToofzApiPassword)} is not set.");
+
+            var toofzApiUserName = Settings.ToofzApiUserName;
+            var toofzApiPassword = Settings.ToofzApiPassword.Decrypt();
+
             telemetryClient = new TelemetryClient();
-            toofzOAuth2Handler = new OAuth2Handler();
+            toofzOAuth2Handler = new OAuth2Handler(toofzApiUserName, toofzApiPassword);
             toofzApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                AutomaticDecompression = DecompressionMethods.GZip,
             }, new DelegatingHandler[]
             {
                 new LoggingHandler(),
-                new HttpRequestStatusHandler(),
+                new ToofzHttpErrorHandler(),
                 toofzOAuth2Handler,
             });
 
@@ -46,21 +54,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
             if (Settings.SteamWebApiKey == null)
-            {
                 throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
-            }
-            var steamWebApiKey = Settings.SteamWebApiKey;
 
-            if (string.IsNullOrEmpty(Settings.ToofzApiUserName))
-            {
-                throw new InvalidOperationException($"{nameof(Settings.ToofzApiUserName)} is not set.");
-            }
-            toofzOAuth2Handler.UserName = Settings.ToofzApiUserName;
-            if (Settings.ToofzApiPassword == null)
-            {
-                throw new InvalidOperationException($"{nameof(Settings.ToofzApiPassword)} is not set.");
-            }
-            toofzOAuth2Handler.Password = Settings.ToofzApiPassword.Decrypt();
+            var steamWebApiKey = Settings.SteamWebApiKey;
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
@@ -106,8 +102,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                         Sort = "updated_at",
                     }, cancellationToken)
                     .ConfigureAwait(false);
-                var steamIds = (from p in response.players
-                                select p.id)
+                var steamIds = (from p in response.Players
+                                select p.Id)
                                .ToList();
 
                 var players = new ConcurrentBag<Player>();
@@ -172,7 +168,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                 using (var activity = new StoreNotifier(Log, "players"))
                 {
                     var bulkStore = await toofzApiClient.PostPlayersAsync(playersIncludingNonExisting, cancellationToken).ConfigureAwait(false);
-                    activity.Progress.Report(bulkStore.rows_affected);
+                    activity.Progress.Report(bulkStore.RowsAffected);
                 }
             }
         }
