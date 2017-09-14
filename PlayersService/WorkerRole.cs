@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,7 +15,7 @@ using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    sealed class WorkerRole : WorkerRoleBase<IPlayersSettings>
+    class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
@@ -56,7 +55,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             if (Settings.SteamWebApiKey == null)
                 throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
 
-            var steamWebApiKey = Settings.SteamWebApiKey;
+            var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
+            var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
 
             var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
@@ -67,9 +67,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers))
             using (var steamWebApiClient = new SteamWebApiClient(steamApiHandlers))
             {
-                toofzApiClient.BaseAddress = new Uri(Settings.ToofzApiBaseAddress);
-
-                steamWebApiClient.SteamWebApiKey = steamWebApiKey.Decrypt();
+                toofzApiClient.BaseAddress = toofzApiBaseAddress;
+                steamWebApiClient.SteamWebApiKey = steamWebApiKey;
 
                 await UpdatePlayersAsync(
                     toofzApiClient,
@@ -95,81 +94,128 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             using (new UpdateNotifier(Log, "players"))
             {
-                var response = await toofzApiClient
-                    .GetPlayersAsync(new GetPlayersParams
-                    {
-                        Limit = limit,
-                        Sort = "updated_at",
-                    }, cancellationToken)
-                    .ConfigureAwait(false);
-                var steamIds = (from p in response.Players
-                                select p.Id)
-                               .ToList();
+                var stalePlayers = await GetStalePlayersAsync(toofzApiClient, limit, cancellationToken).ConfigureAwait(false);
+                var players = await DownloadPlayersAsync(steamWebApiClient, stalePlayers, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken);
+                players = CreateStubsForNonExistingPlayers(stalePlayers, players);
 
-                var players = new ConcurrentBag<Player>();
-                using (var download = new DownloadNotifier(Log, "players"))
+                await StorePlayersAsync(toofzApiClient, players, cancellationToken);
+            }
+        }
+
+        internal async Task<IEnumerable<PlayerDTO>> GetStalePlayersAsync(
+            IToofzApiClient toofzApiClient,
+            int limit,
+            CancellationToken cancellationToken)
+        {
+            var response = await toofzApiClient
+                .GetPlayersAsync(new GetPlayersParams
                 {
-                    var requests = new List<Task>();
-                    for (int i = 0; i < steamIds.Count; i += SteamWebApiClient.MaxPlayerSummariesPerRequest)
-                    {
-                        var ids = steamIds
-                            .Skip(i)
-                            .Take(SteamWebApiClient.MaxPlayerSummariesPerRequest);
-                        var request = MapPlayers();
-                        requests.Add(request);
+                    Limit = limit,
+                    Sort = "updated_at",
+                }, cancellationToken)
+                .ConfigureAwait(false);
 
-                        async Task MapPlayers()
-                        {
-                            var playerSummaries = await steamWebApiClient
-                                .GetPlayerSummariesAsync(ids, download.Progress, cancellationToken)
-                                .ConfigureAwait(false);
+            return response.Players;
+        }
 
-                            foreach (var p in playerSummaries.Response.Players)
-                            {
-                                players.Add(new Player
-                                {
-                                    SteamId = p.SteamId,
-                                    Name = p.PersonaName,
-                                    Avatar = p.Avatar,
-                                });
-                            }
+        internal async Task<IEnumerable<Player>> DownloadPlayersAsync(
+            ISteamWebApiClient steamWebApiClient,
+            IEnumerable<PlayerDTO> stalePlayers,
+            int playersPerRequest,
+            CancellationToken cancellationToken)
+        {
+            var players = new List<Player>(stalePlayers.Count());
 
-                        }
-                    }
-                    await Task.WhenAll(requests).ConfigureAwait(false);
+            using (var download = new DownloadNotifier(Log, "players"))
+            {
+                var requests = new List<Task<IEnumerable<Player>>>();
+                for (int i = 0; i < stalePlayers.Count(); i += playersPerRequest)
+                {
+                    var ids = stalePlayers
+                        .Skip(i)
+                        .Take(playersPerRequest)
+                        .Select(p => p.Id)
+                        .ToList();
+                    var request = GetPlayersAsync(steamWebApiClient, ids, download.Progress, cancellationToken);
+                    requests.Add(request);
                 }
 
-                Debug.Assert(!players.Any(p => p == null));
-
-                // TODO: Document purpose.
-                var playersIncludingNonExisting = steamIds.GroupJoin(
-                    players,
-                    id => id,
-                    p => p.SteamId,
-                    (id, ps) =>
-                    {
-                        var p = ps.SingleOrDefault();
-                        if (p != null)
-                        {
-                            p.Exists = true;
-                        }
-                        else
-                        {
-                            p = new Player
-                            {
-                                SteamId = id,
-                                Exists = false,
-                            };
-                        }
-                        p.LastUpdate = DateTime.UtcNow;
-                        return p;
-                    });
-
-                using (var activity = new StoreNotifier(Log, "players"))
+                var batches = await Task.WhenAll(requests).ConfigureAwait(false);
+                foreach (var batch in batches)
                 {
-                    var bulkStore = await toofzApiClient.PostPlayersAsync(playersIncludingNonExisting, cancellationToken).ConfigureAwait(false);
-                    activity.Progress.Report(bulkStore.RowsAffected);
+                    players.AddRange(batch);
                 }
+            }
+
+            Debug.Assert(!players.Any(p => p == null));
+
+            return players;
+        }
+
+        internal async Task<IEnumerable<Player>> GetPlayersAsync(
+            ISteamWebApiClient steamWebApiClient,
+            IEnumerable<long> ids,
+            IProgress<long> progress,
+            CancellationToken cancellationToken)
+        {
+            var players = new List<Player>(ids.Count());
+
+            var playerSummaries = await steamWebApiClient
+                .GetPlayerSummariesAsync(ids, progress, cancellationToken)
+                .ConfigureAwait(false);
+
+            foreach (var p in playerSummaries.Response.Players)
+            {
+                players.Add(new Player
+                {
+                    SteamId = p.SteamId,
+                    Name = p.PersonaName,
+                    Avatar = p.Avatar,
+                    LastUpdate = DateTime.UtcNow,
+                });
+            }
+
+            return players;
+        }
+
+        // Create a stub player if Steam didn't return a response for a Steam ID
+        internal IEnumerable<Player> CreateStubsForNonExistingPlayers(IEnumerable<PlayerDTO> stalePlayers, IEnumerable<Player> players)
+        {
+            return (from s in stalePlayers
+                    join p in players on s.Id equals p.SteamId into ps
+                    from p in ps.DefaultIfEmpty()
+                    select (s, p))
+                   .Select(sp =>
+                   {
+                       var (s, p) = sp;
+                       if (p != null)
+                       {
+                           p.Exists = true;
+                       }
+                       else
+                       {
+                           p = new Player
+                           {
+                               SteamId = s.Id,
+                               Exists = false,
+                               LastUpdate = DateTime.UtcNow,
+                           };
+                       }
+
+                       return p;
+                   })
+                   .ToList();
+        }
+
+        internal async Task StorePlayersAsync(
+            IToofzApiClient toofzApiClient,
+            IEnumerable<Player> players,
+            CancellationToken cancellationToken)
+        {
+            using (var activity = new StoreNotifier(Log, "players"))
+            {
+                var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
+                activity.Progress.Report(bulkStore.RowsAffected);
             }
         }
     }

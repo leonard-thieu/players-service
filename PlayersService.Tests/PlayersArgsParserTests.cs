@@ -59,7 +59,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--players=10" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -82,7 +82,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--toofz=http://localhost/" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -105,7 +105,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--username=myUserName" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -124,7 +124,7 @@ options:
             {
                 // Arrange
                 string[] args = new string[0];
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = null,
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -169,7 +169,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--password=myPassword" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -189,7 +189,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--password" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -212,7 +212,7 @@ options:
             {
                 // Arrange
                 string[] args = new string[0];
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = null,
@@ -258,7 +258,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--apikey=myApiKey" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -278,7 +278,7 @@ options:
             {
                 // Arrange
                 string[] args = new[] { "--apikey" };
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
@@ -301,7 +301,7 @@ options:
             {
                 // Arrange
                 string[] args = new string[0];
-                IPlayersSettings settings = new SimplePlayersSettings
+                IPlayersSettings settings = new StubPlayersSettings
                 {
                     ToofzApiUserName = "a",
                     ToofzApiPassword = new EncryptedSecret("a", Constants.Iterations),
