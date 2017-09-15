@@ -140,7 +140,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Constants.cs" />
     <Compile Include="PlayersArgsParserTests.cs" />
     <Compile Include="StubPlayersSettings.cs" />
     <Compile Include="WorkerRoleTests.cs" />
