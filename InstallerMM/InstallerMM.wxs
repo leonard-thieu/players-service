@@ -88,6 +88,9 @@
         <Component Id="owcE4E6B570ADBEC007C10E9A65C0D3809D" Guid="505ee0c9-d5a3-8e70-221f-48e70d9ec096">
           <File Id="owfE4E6B570ADBEC007C10E9A65C0D3809D" Source="$(var.SourceDir)\System.ValueTuple.dll" KeyPath="yes" />
         </Component>
+        <Component Id="owcD0A940C4737AEDDE1A3178260CF6D5E9" Guid="288adc1d-48d5-8344-5b22-8745adf79316">
+          <File Id="owfD0A940C4737AEDDE1A3178260CF6D5E9" Source="$(var.SourceDir)\System.Web.Http.dll" KeyPath="yes" />
+        </Component>
         <Component Id="owcF719C5F01913951F80887C901C3807F4" Guid="d32204d3-a32f-e912-0016-a93dbfa23399">
           <File Id="owfF719C5F01913951F80887C901C3807F4" Source="$(var.SourceDir)\toofz.dll" KeyPath="yes" />
         </Component>
