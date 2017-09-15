@@ -30,7 +30,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     new EnvironmentAdapter(),
                     settings,
                     worker,
-                    new PlayersArgsParser(Console.In, Console.Out, Console.Error, settings.KeyDerivationIterations),
+                    new PlayersArgsParser(Console.In, Console.Out, Console.Error),
                     new ServiceBaseAdapter(),
                     Log);
             }

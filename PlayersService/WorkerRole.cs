@@ -58,10 +58,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
             var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
 
-            var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+            var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip,
+            }, new DelegatingHandler[]
             {
                 new LoggingHandler(),
                 new SteamWebApiTransientFaultHandler(telemetryClient),
+                new ContentLengthHandler(),
             });
 
             using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers))
@@ -126,7 +130,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         {
             var players = new List<Player>(stalePlayers.Count());
 
-            using (var download = new DownloadNotifier(Log, "players"))
+            using (var downloadNotifier = new DownloadNotifier(Log, "players"))
             {
                 var requests = new List<Task<IEnumerable<Player>>>();
                 for (int i = 0; i < stalePlayers.Count(); i += playersPerRequest)
@@ -136,7 +140,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                         .Take(playersPerRequest)
                         .Select(p => p.Id)
                         .ToList();
-                    var request = GetPlayersAsync(steamWebApiClient, ids, download.Progress, cancellationToken);
+                    var request = GetPlayersAsync(steamWebApiClient, ids, downloadNotifier, cancellationToken);
                     requests.Add(request);
                 }
 
@@ -184,25 +188,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             return (from s in stalePlayers
                     join p in players on s.Id equals p.SteamId into ps
                     from p in ps.DefaultIfEmpty()
-                    select (s, p))
+                    select new
+                    {
+                        StalePlayer = s,
+                        Player = p,
+                    })
                    .Select(sp =>
                    {
-                       var (s, p) = sp;
-                       if (p != null)
+                       var player = sp.Player;
+                       if (player != null)
                        {
-                           p.Exists = true;
+                           player.Exists = true;
                        }
                        else
                        {
-                           p = new Player
+                           player = new Player
                            {
-                               SteamId = s.Id,
+                               SteamId = sp.StalePlayer.Id,
                                Exists = false,
                                LastUpdate = DateTime.UtcNow,
                            };
                        }
 
-                       return p;
+                       return player;
                    })
                    .ToList();
         }
@@ -215,7 +223,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             using (var activity = new StoreNotifier(Log, "players"))
             {
                 var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
-                activity.Progress.Report(bulkStore.RowsAffected);
+                activity.Report(bulkStore.RowsAffected);
             }
         }
     }

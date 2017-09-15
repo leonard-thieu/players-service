@@ -9,13 +9,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
     sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {
-        public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter, int iterations) :
-            base(inReader, outWriter, errorWriter)
-        {
-            this.iterations = iterations;
-        }
-
-        readonly int iterations;
+        public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter) : base(inReader, outWriter, errorWriter) { }
 
         protected override string EntryAssemblyFileName { get; } = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
 
@@ -33,6 +27,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         protected override void OnParsed(PlayersOptions options, IPlayersSettings settings)
         {
             base.OnParsed(options, settings);
+
+            var iterations = settings.KeyDerivationIterations;
 
             #region PlayersPerUpdate
 
