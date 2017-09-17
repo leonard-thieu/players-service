@@ -105,14 +105,14 @@
     <Reference Include="toofz, Version=7.0.0.175, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\toofz.7.0.0\lib\net45\toofz.dll</HintPath>
     </Reference>
-    <Reference Include="toofz.NecroDancer.Leaderboards, Version=7.0.0.146, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\toofz.NecroDancer.Leaderboards.7.0.0\lib\net45\toofz.NecroDancer.Leaderboards.dll</HintPath>
+    <Reference Include="toofz.NecroDancer.Leaderboards, Version=8.0.1.161, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.NecroDancer.Leaderboards.8.0.1\lib\net45\toofz.NecroDancer.Leaderboards.dll</HintPath>
     </Reference>
-    <Reference Include="toofz.Services, Version=9.0.2.209, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\toofz.Services.9.0.2\lib\net45\toofz.Services.dll</HintPath>
+    <Reference Include="toofz.Services, Version=9.0.3.214, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.Services.9.0.3\lib\net45\toofz.Services.dll</HintPath>
     </Reference>
-    <Reference Include="toofz.TestsShared, Version=3.0.0.76, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\toofz.TestsShared.3.0.0\lib\net45\toofz.TestsShared.dll</HintPath>
+    <Reference Include="toofz.TestsShared, Version=4.0.0.81, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\toofz.TestsShared.4.0.0\lib\net45\toofz.TestsShared.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

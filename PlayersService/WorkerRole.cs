@@ -21,7 +21,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
 
-        TelemetryClient telemetryClient;
         OAuth2Handler toofzOAuth2Handler;
         HttpMessageHandler toofzApiHandlers;
 
@@ -35,7 +34,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             var toofzApiUserName = Settings.ToofzApiUserName;
             var toofzApiPassword = Settings.ToofzApiPassword.Decrypt();
 
-            telemetryClient = new TelemetryClient();
             toofzOAuth2Handler = new OAuth2Handler(toofzApiUserName, toofzApiPassword);
             toofzApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
             {
@@ -64,11 +62,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             }, new DelegatingHandler[]
             {
                 new LoggingHandler(),
-                new SteamWebApiTransientFaultHandler(telemetryClient),
+                new SteamWebApiTransientFaultHandler(),
                 new ContentLengthHandler(),
             });
 
-            using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers))
+            using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers, disposeHandler: false))
             using (var steamWebApiClient = new SteamWebApiClient(steamApiHandlers))
             {
                 toofzApiClient.BaseAddress = toofzApiBaseAddress;
