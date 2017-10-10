@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +9,38 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
     class WorkerRoleTests
     {
+        [TestClass]
+        public class CreateToofzApiHandlerMethod
+        {
+            [TestMethod]
+            public void ReturnsToofzApiHandler()
+            {
+                // Arrange
+                var toofzApiUserName = "myUserName";
+                var toofzApiPassword = "myPassword";
+
+                // Act
+                var handler = WorkerRole.CreateToofzApiHandler(toofzApiUserName, toofzApiPassword);
+
+                // Assert
+                Assert.IsInstanceOfType(handler, typeof(HttpMessageHandler));
+            }
+        }
+
+        [TestClass]
+        public class CreateSteamApiHandler
+        {
+            [TestMethod]
+            public void ReturnsCreateSteamApiHandler()
+            {
+                // Arrange -> Act
+                var handler = WorkerRole.CreateSteamApiHandler();
+
+                // Assert
+                Assert.IsInstanceOfType(handler, typeof(HttpMessageHandler));
+            }
+        }
+
         [TestClass]
         public class OnStartMethod
         {

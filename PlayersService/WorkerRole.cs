@@ -15,10 +15,32 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
+        internal static HttpMessageHandler CreateToofzApiHandler(string toofzApiUserName, string toofzApiPassword)
+        {
+            return HttpClientFactory.CreatePipeline(new WebRequestHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip,
+            }, new DelegatingHandler[]
+            {
+                new LoggingHandler(),
+                new ToofzHttpErrorHandler(),
+                new OAuth2Handler(toofzApiUserName, toofzApiPassword),
+            });
+        }
+
+        internal static HttpMessageHandler CreateSteamApiHandler()
+        {
+            return HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+            {
+                new LoggingHandler(),
+                new GZipHandler(),
+                new SteamWebApiTransientFaultHandler(),
+            });
+        }
+
         public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
 
-        OAuth2Handler toofzOAuth2Handler;
-        HttpMessageHandler toofzApiHandlers;
+        HttpMessageHandler toofzApiHandler;
 
         protected override void OnStart(string[] args)
         {
@@ -30,16 +52,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             var toofzApiUserName = Settings.ToofzApiUserName;
             var toofzApiPassword = Settings.ToofzApiPassword.Decrypt();
 
-            toofzOAuth2Handler = new OAuth2Handler(toofzApiUserName, toofzApiPassword);
-            toofzApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip,
-            }, new DelegatingHandler[]
-            {
-                new LoggingHandler(),
-                new ToofzHttpErrorHandler(),
-                toofzOAuth2Handler,
-            });
+            toofzApiHandler = CreateToofzApiHandler(toofzApiUserName, toofzApiPassword);
 
             base.OnStart(args);
         }
@@ -57,19 +70,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                 var worker = new PlayersWorker();
 
-                using (var toofzApiClient = new ToofzApiClient(toofzApiHandlers, disposeHandler: false))
+                using (var toofzApiClient = new ToofzApiClient(toofzApiHandler, disposeHandler: false))
                 {
                     toofzApiClient.BaseAddress = toofzApiBaseAddress;
 
                     var players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
 
-                    var steamApiHandlers = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
-                    {
-                        new LoggingHandler(),
-                        new GZipHandler(),
-                        new SteamWebApiTransientFaultHandler(),
-                    });
-                    using (var steamWebApiClient = new SteamWebApiClient(steamApiHandlers))
+                    using (var steamWebApiClient = new SteamWebApiClient(CreateSteamApiHandler()))
                     {
                         steamWebApiClient.SteamWebApiKey = steamWebApiKey;
 
