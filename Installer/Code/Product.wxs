@@ -8,8 +8,6 @@
   <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="$(var.MSIProductVersion)" Manufacturer="$(var.Manufacturer)" UpgradeCode="34b630ec-1a5b-43b1-aba1-ed084ac4a554">
     <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine" Manufacturer="$(var.Manufacturer)" />
     <MediaTemplate EmbedCab="yes" />
-    <!-- Major Upgrade Rule to disallow downgrades -->
-    <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit." />
     <!-- Common Launch Condition -->
     <!-- Examples at http://wixtoolset.org/documentation/manual/v3/customactions/wixnetfxextension.html -->
     <PropertyRef Id="NETFRAMEWORK45" />
