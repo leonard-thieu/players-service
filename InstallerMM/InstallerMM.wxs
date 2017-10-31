@@ -57,9 +57,7 @@
           <File Id="owfF2790E5923B0B020D9E2D80974AFD905" Source="$(var.SourceDir)\PlayersService.exe" KeyPath="yes" />
           <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Retrieves player data from Steam." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes" />
           <ServiceControl Id="sc85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" Start="install" Stop="both" Remove="both" Wait="yes" />
-        </Component>
-        <Component Id="owc2D54FC3E87FA631FA2CAE4A3E9B25978" Guid="fbdfbb0b-3514-90cb-a392-11f98620a178">
-          <File Id="owf2D54FC3E87FA631FA2CAE4A3E9B25978" Source="$(var.SourceDir)\PlayersService.exe.config" KeyPath="yes" />
+          <File Id="owf2D54FC3E87FA631FA2CAE4A3E9B25978" Source="$(var.SourceDir)\PlayersService.exe.config" CompanionFile="owfF2790E5923B0B020D9E2D80974AFD905" />
         </Component>
         <Component Id="owcED4CA0C587B1FFB62753FB5DED9C7587" Guid="c81d2020-653a-ed0b-7d1a-b67616f88462">
           <File Id="owfED4CA0C587B1FFB62753FB5DED9C7587" Source="$(var.SourceDir)\protobuf-net.dll" KeyPath="yes" />
