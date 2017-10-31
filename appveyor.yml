@@ -1,6 +1,9 @@
 version: 3.0.8.{build}
 image: Visual Studio 2017
 
+branches:
+  only:
+    - master
 configuration:
   - Release
 environment:
