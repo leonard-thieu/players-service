@@ -2,7 +2,7 @@
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    sealed class PlayersOptions : Options
+    internal sealed class PlayersOptions : Options
     {
         /// <summary>
         /// The number of players to update.

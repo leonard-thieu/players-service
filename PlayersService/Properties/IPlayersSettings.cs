@@ -2,7 +2,7 @@
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties
 {
-    interface IPlayersSettings : ISettings
+    internal interface IPlayersSettings : ISettings
     {
         /// <summary>
         /// The number of players to update.

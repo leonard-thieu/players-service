@@ -11,9 +11,9 @@ using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    class WorkerRole : WorkerRoleBase<IPlayersSettings>
+    internal class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
-        static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
         internal static HttpMessageHandler CreateToofzApiHandler(string toofzApiUserName, string toofzApiPassword)
         {
@@ -40,7 +40,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
 
-        HttpMessageHandler toofzApiHandler;
+        private HttpMessageHandler toofzApiHandler;
 
         protected override void OnStart(string[] args)
         {

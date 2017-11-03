@@ -7,7 +7,7 @@ using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
+    internal sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {
         public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter) : base(inReader, outWriter, errorWriter) { }
 

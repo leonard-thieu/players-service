@@ -9,9 +9,9 @@ using toofz.NecroDancer.Leaderboards.toofz;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    sealed class PlayersWorker
+    internal sealed class PlayersWorker
     {
-        static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
 
         public async Task<IEnumerable<Player>> GetPlayersAsync(
             IToofzApiClient toofzApiClient,
