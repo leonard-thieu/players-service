@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
 using toofz.NecroDancer.Leaderboards.toofz;
+using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
-    class PlayersWorkerTests
+    public class PlayersWorkerTests
     {
         public PlayersWorkerTests()
         {
@@ -18,31 +18,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             SteamWebApiClient = MockSteamWebApiClient.Object;
         }
 
-        public PlayersWorker Worker { get; set; } = new PlayersWorker();
+        internal PlayersWorker Worker { get; set; } = new PlayersWorker();
         public Mock<IToofzApiClient> MockToofzApiClient { get; set; } = new Mock<IToofzApiClient>();
         public IToofzApiClient ToofzApiClient { get; set; }
         public Mock<ISteamWebApiClient> MockSteamWebApiClient { get; set; } = new Mock<ISteamWebApiClient>();
         public ISteamWebApiClient SteamWebApiClient { get; set; }
         public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
-        [TestClass]
         public class Constructor
         {
-            [TestMethod]
+            [Fact]
             public void ReturnsInstance()
             {
                 // Arrange -> Act
                 var worker = new PlayersWorker();
 
                 // Assert
-                Assert.IsInstanceOfType(worker, typeof(PlayersWorker));
+                Assert.IsAssignableFrom<PlayersWorker>(worker);
             }
         }
 
-        [TestClass]
         public class GetPlayersAsyncMethod : PlayersWorkerTests
         {
-            [TestMethod]
+            [Fact]
             public async Task ToofzApiClientIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
@@ -50,26 +48,26 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var limit = 100;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 {
                     return Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task LimitIsNonpositive_ThrowsArgumentOutOfRangeException()
             {
                 // Arrange
                 var limit = 0;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(() =>
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 {
                     return Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task ReturnsPlayers()
             {
                 // Arrange
@@ -83,69 +81,68 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var players = await Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
 
                 // Assert
-                Assert.IsInstanceOfType(players, typeof(IEnumerable<Player>));
+                Assert.IsAssignableFrom<IEnumerable<Player>>(players);
             }
         }
 
-        [TestClass]
         public class UpdatePlayersAsyncMethod : PlayersWorkerTests
         {
             public List<Player> Players { get; set; } = new List<Player>();
             public int PlayersPerRequest { get; set; } = 100;
 
-            [TestMethod]
+            [Fact]
             public async Task SteamWebApiClientIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
                 SteamWebApiClient = null;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 {
                     return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task PlayersIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
                 Players = null;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 {
                     return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task PlayersPerRequestIsNonpositive_ThrowsArgumentOutOfRangeException()
             {
                 // Arrange
                 PlayersPerRequest = 0;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(() =>
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 {
                     return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task PlayersPerRequestIsGreaterThanMaxPlayerSummariesPerRequest_ThrowsArgumentOutOfRangeException()
             {
                 // Arrange
                 PlayersPerRequest = Steam.WebApi.SteamWebApiClient.MaxPlayerSummariesPerRequest + 1;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(() =>
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 {
                     return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task StalePlayersCountGreaterThanPlayersPerRequest_RequestsPlayersInBatches()
             {
                 // Arrange
@@ -170,7 +167,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 MockSteamWebApiClient.Verify(s => s.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), CancellationToken), Times.Exactly(2));
             }
 
-            [TestMethod]
+            [Fact]
             public async Task HasMatchingPlayerSummary_UpdatesPlayer()
             {
                 // Arrange
@@ -199,13 +196,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 await Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
 
                 // Assert
-                Assert.IsTrue(player.Exists == true);
-                Assert.IsNotNull(player.LastUpdate);
-                Assert.AreEqual("myPersonaName", player.Name);
-                Assert.AreEqual("http://example.org/", player.Avatar);
+                Assert.True(player.Exists == true);
+                Assert.NotNull(player.LastUpdate);
+                Assert.Equal("myPersonaName", player.Name);
+                Assert.Equal("http://example.org/", player.Avatar);
             }
 
-            [TestMethod]
+            [Fact]
             public async Task DoesNotHaveMatchingPlayerSummary_MarksPlayerAsNonExistent()
             {
                 // Arrange
@@ -224,43 +221,42 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
 
                 // Assert
-                Assert.IsTrue(player.Exists == false);
-                Assert.IsNotNull(player.LastUpdate);
+                Assert.True(player.Exists == false);
+                Assert.NotNull(player.LastUpdate);
             }
         }
 
-        [TestClass]
         public class StorePlayersAsyncMethod : PlayersWorkerTests
         {
             public List<Player> Players { get; set; } = new List<Player>();
 
-            [TestMethod]
+            [Fact]
             public async Task ToofzApiClientIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
                 ToofzApiClient = null;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 {
                     return Worker.StorePlayersAsync(ToofzApiClient, Players, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task PlayersIsNull_ThrowsArgumentNullException()
             {
                 // Arrange
                 Players = null;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<ArgumentNullException>(() =>
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                 {
                     return Worker.StorePlayersAsync(ToofzApiClient, Players, CancellationToken);
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public async Task StoresPlayers()
             {
                 // Arrange

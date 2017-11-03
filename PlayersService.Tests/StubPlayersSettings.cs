@@ -1,9 +1,10 @@
 ﻿using System;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
+using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
-    class StubPlayersSettings : IPlayersSettings
+    internal class StubPlayersSettings : IPlayersSettings
     {
         public int PlayersPerUpdate { get; set; }
         public string ToofzApiBaseAddress { get; set; }

@@ -1,14 +1,13 @@
 ﻿using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.TestsShared;
+using toofz.Services;
+using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
-    class PlayersArgsParserTests
+    public class PlayersArgsParserTests
     {
-        [TestClass]
         public class Parse
         {
             public Parse()
@@ -17,13 +16,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 parser = new PlayersArgsParser(inReader, outWriter, errorWriter);
             }
 
-            Mock<TextReader> mockInReader = new Mock<TextReader>(MockBehavior.Strict);
-            TextReader inReader;
-            TextWriter outWriter = new StringWriter();
-            TextWriter errorWriter = new StringWriter();
-            PlayersArgsParser parser;
+            private Mock<TextReader> mockInReader = new Mock<TextReader>(MockBehavior.Strict);
+            private TextReader inReader;
+            private TextWriter outWriter = new StringWriter();
+            private TextWriter errorWriter = new StringWriter();
+            private PlayersArgsParser parser;
 
-            [TestMethod]
+            [Fact]
             public void HelpFlagIsSpecified_ShowUsageInformation()
             {
                 // Arrange
@@ -35,7 +34,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 parser.Parse(args, settings);
 
                 // Assert
-                Assert.That.NormalizedAreEqual(@"
+                Assert.Equal(@"
 Usage: PlayersService.exe [options]
 
 options:
@@ -49,12 +48,12 @@ options:
   --username=VALUE    The user name used to log on to toofz API.
   --password[=VALUE]  The password used to log on to toofz API.
   --apikey[=VALUE]    A Steam Web API key.
-", outWriter.ToString());
+", outWriter.ToString(), ignoreLineEndingDifferences: true);
             }
 
             #region PlayersPerUpdate
 
-            [TestMethod]
+            [Fact]
             public void PlayersIsSpecified_SetsPlayersPerUpdate()
             {
                 // Arrange
@@ -70,14 +69,14 @@ options:
                 parser.Parse(args, settings);
 
                 // Assert
-                Assert.AreEqual(10, settings.PlayersPerUpdate);
+                Assert.Equal(10, settings.PlayersPerUpdate);
             }
 
             #endregion
 
             #region ToofzApiBaseAddress
 
-            [TestMethod]
+            [Fact]
             public void ToofzIsSpecified_SetsToofzApiBaseAddress()
             {
                 // Arrange
@@ -93,14 +92,14 @@ options:
                 parser.Parse(args, settings);
 
                 // Assert
-                Assert.AreEqual("http://localhost/", settings.ToofzApiBaseAddress);
+                Assert.Equal("http://localhost/", settings.ToofzApiBaseAddress);
             }
 
             #endregion
 
             #region ToofzApiUserName
 
-            [TestMethod]
+            [Fact]
             public void UserNameIsSpecified_SetToofzApiUserName()
             {
                 // Arrange
@@ -116,10 +115,10 @@ options:
                 parser.Parse(args, settings);
 
                 // Assert
-                Assert.AreEqual("myUserName", settings.ToofzApiUserName);
+                Assert.Equal("myUserName", settings.ToofzApiUserName);
             }
 
-            [TestMethod]
+            [Fact]
             public void UserNameIsNotSpecifiedAndToofzApiUserNameIsNotSet_PromptsUserForUserNameAndSetsToofzApiUserName()
             {
                 // Arrange
@@ -138,10 +137,10 @@ options:
                 parser.Parse(args, settings);
 
                 // Assert
-                Assert.AreEqual("myUserName", settings.ToofzApiUserName);
+                Assert.Equal("myUserName", settings.ToofzApiUserName);
             }
 
-            [TestMethod]
+            [Fact]
             public void UserNameIsNotSpecifiedAndToofzApiUserNameIsSet_DoesNotSetToofzApiUserName()
             {
                 // Arrange
@@ -164,7 +163,7 @@ options:
 
             #region ToofzApiPassword
 
-            [TestMethod]
+            [Fact]
             public void PasswordIsSpecified_SetsToofzApiPassword()
             {
                 // Arrange
@@ -182,10 +181,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myPassword", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void PasswordFlagIsSpecified_PromptsUserForPasswordAndSetsToofzApiPassword()
             {
                 // Arrange
@@ -206,10 +205,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myPassword", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void PasswordFlagIsNotSpecifiedAndToofzApiPasswordIsNotSet_PromptsUserForPasswordAndSetsToofzApiPassword()
             {
                 // Arrange
@@ -230,10 +229,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myPassword", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.ToofzApiPassword.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void PasswordFlagIsNotSpecifiedAndToofzApiPasswordIsSet_DoesNotSetToofzApiPassword()
             {
                 // Arrange
@@ -257,7 +256,7 @@ options:
 
             #region SteamWebApiKey
 
-            [TestMethod]
+            [Fact]
             public void ApikeyIsSpecified_SetsSteamWebApiKey()
             {
                 // Arrange
@@ -275,10 +274,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myApiKey", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void ApikeyFlagIsSpecified_PromptsUserForApikeyAndSetsSteamWebApiKey()
             {
                 // Arrange
@@ -299,10 +298,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myApiKey", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void ApikeyFlagIsNotSpecifiedAndSteamWebApiKeyIsNotSet_PromptsUserForApikeyAndSetsSteamWebApiKey()
             {
                 // Arrange
@@ -323,10 +322,10 @@ options:
 
                 // Assert
                 var encrypted = new EncryptedSecret("myApiKey", 1);
-                Assert.AreEqual(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
+                Assert.Equal(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
             }
 
-            [TestMethod]
+            [Fact]
             public void ApikeyFlagIsNotSpecifiedAndSteamWebApiKeyIsSet_DoesNotSetSteamWebApiKey()
             {
                 // Arrange

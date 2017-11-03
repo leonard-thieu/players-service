@@ -2,17 +2,17 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
+using toofz.Services;
+using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
-    class WorkerRoleTests
+    public class WorkerRoleTests
     {
-        [TestClass]
         public class CreateToofzApiHandlerMethod
         {
-            [TestMethod]
+            [Fact]
             public void ReturnsToofzApiHandler()
             {
                 // Arrange
@@ -23,28 +23,26 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var handler = WorkerRole.CreateToofzApiHandler(toofzApiUserName, toofzApiPassword);
 
                 // Assert
-                Assert.IsInstanceOfType(handler, typeof(HttpMessageHandler));
+                Assert.IsAssignableFrom<HttpMessageHandler>(handler);
             }
         }
 
-        [TestClass]
         public class CreateSteamApiHandler
         {
-            [TestMethod]
+            [Fact]
             public void ReturnsCreateSteamApiHandler()
             {
                 // Arrange -> Act
                 var handler = WorkerRole.CreateSteamApiHandler();
 
                 // Assert
-                Assert.IsInstanceOfType(handler, typeof(HttpMessageHandler));
+                Assert.IsAssignableFrom<HttpMessageHandler>(handler);
             }
         }
 
-        [TestClass]
         public class OnStartMethod
         {
-            [TestMethod]
+            [Fact]
             public void ToofzApiUserNameIsNull_ThrowsInvalidOperationException()
             {
                 // Arrange
@@ -56,13 +54,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var workerRole = new WorkerRole(settings);
 
                 // Act -> Assert
-                Assert.ThrowsException<InvalidOperationException>(() =>
+                Assert.Throws<InvalidOperationException>(() =>
                 {
                     workerRole.Start();
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public void ToofzApiUserNameIsEmpty_ThrowsInvalidOperationException()
             {
                 // Arrange
@@ -74,13 +72,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var workerRole = new WorkerRole(settings);
 
                 // Act -> Assert
-                Assert.ThrowsException<InvalidOperationException>(() =>
+                Assert.Throws<InvalidOperationException>(() =>
                 {
                     workerRole.Start();
                 });
             }
 
-            [TestMethod]
+            [Fact]
             public void ToofzApiPasswordIsNull_ThrowsInvalidOperationException()
             {
                 // Arrange
@@ -92,17 +90,16 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var workerRole = new WorkerRole(settings);
 
                 // Act -> Assert
-                Assert.ThrowsException<InvalidOperationException>(() =>
+                Assert.Throws<InvalidOperationException>(() =>
                 {
                     workerRole.Start();
                 });
             }
         }
 
-        [TestClass]
         public class RunAsyncOverrideMethod
         {
-            [TestMethod]
+            [Fact]
             public async Task SteamWebApiKeyIsNull_ThrowsInvalidOperationException()
             {
                 // Arrange
@@ -114,13 +111,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 var cancellationToken = CancellationToken.None;
 
                 // Act -> Assert
-                await Assert.ThrowsExceptionAsync<InvalidOperationException>(() =>
+                await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 {
                     return workerRole.PublicRunAsyncOverride(cancellationToken);
                 });
             }
 
-            class WorkerRoleAdapter : WorkerRole
+            private class WorkerRoleAdapter : WorkerRole
             {
                 public WorkerRoleAdapter(IPlayersSettings settings) : base(settings) { }
 

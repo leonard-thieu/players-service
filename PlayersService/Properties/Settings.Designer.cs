@@ -153,9 +153,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsDescriptionAttribute("The password used to log on to toofz API.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::toofz.EncryptedSecret ToofzApiPassword {
+        public global::toofz.Services.EncryptedSecret ToofzApiPassword {
             get {
-                return ((global::toofz.EncryptedSecret)(this["ToofzApiPassword"]));
+                return ((global::toofz.Services.EncryptedSecret)(this["ToofzApiPassword"]));
             }
             set {
                 this["ToofzApiPassword"] = value;
@@ -168,9 +168,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsDescriptionAttribute("A Steam Web API key.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::toofz.EncryptedSecret SteamWebApiKey {
+        public global::toofz.Services.EncryptedSecret SteamWebApiKey {
             get {
-                return ((global::toofz.EncryptedSecret)(this["SteamWebApiKey"]));
+                return ((global::toofz.Services.EncryptedSecret)(this["SteamWebApiKey"]));
             }
             set {
                 this["SteamWebApiKey"] = value;
