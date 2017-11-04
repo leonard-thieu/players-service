@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlayersService", "PlayersService\PlayersService.csproj", "{714C9B00-9392-4F2A-872C-3FE575A23D12}"
 EndProject
@@ -34,14 +34,16 @@ Global
 		{3F602AB5-05E8-4A2D-B84A-F76EE07BE5EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{29822A3A-CFDB-4A20-B5F5-724A763548C1}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{29822A3A-CFDB-4A20-B5F5-724A763548C1}.Release|Any CPU.ActiveCfg = Release|x86
+		{29822A3A-CFDB-4A20-B5F5-724A763548C1}.Release|Any CPU.Build.0 = Release|x86
 		{BCF56BEC-495F-4DF3-88E4-9A11DA171676}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{BCF56BEC-495F-4DF3-88E4-9A11DA171676}.Release|Any CPU.ActiveCfg = Release|x86
+		{BCF56BEC-495F-4DF3-88E4-9A11DA171676}.Release|Any CPU.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {138567F5-5ADB-4DCB-9500-2CFE91DB81D5}
 		EnterpriseLibraryConfigurationToolBinariesPathV6 = packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8
+		SolutionGuid = {138567F5-5ADB-4DCB-9500-2CFE91DB81D5}
 	EndGlobalSection
 EndGlobal
