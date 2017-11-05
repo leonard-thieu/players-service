@@ -41,33 +41,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
         public class GetPlayersAsyncMethod : PlayersWorkerTests
         {
             [Fact]
-            public async Task ToofzApiClientIsNull_ThrowsArgumentNullException()
-            {
-                // Arrange
-                ToofzApiClient = null;
-                var limit = 100;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                {
-                    return Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
-                });
-            }
-
-            [Fact]
-            public async Task LimitIsNonpositive_ThrowsArgumentOutOfRangeException()
-            {
-                // Arrange
-                var limit = 0;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                {
-                    return Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
-                });
-            }
-
-            [Fact]
             public async Task ReturnsPlayers()
             {
                 // Arrange
@@ -89,58 +62,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
         {
             public List<Player> Players { get; set; } = new List<Player>();
             public int PlayersPerRequest { get; set; } = 100;
-
-            [Fact]
-            public async Task SteamWebApiClientIsNull_ThrowsArgumentNullException()
-            {
-                // Arrange
-                SteamWebApiClient = null;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                {
-                    return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
-                });
-            }
-
-            [Fact]
-            public async Task PlayersIsNull_ThrowsArgumentNullException()
-            {
-                // Arrange
-                Players = null;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                {
-                    return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
-                });
-            }
-
-            [Fact]
-            public async Task PlayersPerRequestIsNonpositive_ThrowsArgumentOutOfRangeException()
-            {
-                // Arrange
-                PlayersPerRequest = 0;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                {
-                    return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
-                });
-            }
-
-            [Fact]
-            public async Task PlayersPerRequestIsGreaterThanMaxPlayerSummariesPerRequest_ThrowsArgumentOutOfRangeException()
-            {
-                // Arrange
-                PlayersPerRequest = Steam.WebApi.SteamWebApiClient.MaxPlayerSummariesPerRequest + 1;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                {
-                    return Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
-                });
-            }
 
             [Fact]
             public async Task StalePlayersCountGreaterThanPlayersPerRequest_RequestsPlayersInBatches()
@@ -229,32 +150,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
         public class StorePlayersAsyncMethod : PlayersWorkerTests
         {
             public List<Player> Players { get; set; } = new List<Player>();
-
-            [Fact]
-            public async Task ToofzApiClientIsNull_ThrowsArgumentNullException()
-            {
-                // Arrange
-                ToofzApiClient = null;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                {
-                    return Worker.StorePlayersAsync(ToofzApiClient, Players, CancellationToken);
-                });
-            }
-
-            [Fact]
-            public async Task PlayersIsNull_ThrowsArgumentNullException()
-            {
-                // Arrange
-                Players = null;
-
-                // Act -> Assert
-                await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                {
-                    return Worker.StorePlayersAsync(ToofzApiClient, Players, CancellationToken);
-                });
-            }
 
             [Fact]
             public async Task StoresPlayers()

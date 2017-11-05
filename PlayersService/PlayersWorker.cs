@@ -18,11 +18,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             int limit,
             CancellationToken cancellationToken)
         {
-            if (toofzApiClient == null)
-                throw new ArgumentNullException(nameof(toofzApiClient));
-            if (limit < 1)
-                throw new ArgumentOutOfRangeException(nameof(limit), limit, $"'{nameof(limit)}' must be a positive number.");
-
             var @params = new GetPlayersParams
             {
                 Limit = limit,
@@ -51,13 +46,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         {
             using (var activity = new DownloadActivity(Log, "players"))
             {
-                if (steamWebApiClient == null)
-                    throw new ArgumentNullException(nameof(steamWebApiClient));
-                if (players == null)
-                    throw new ArgumentNullException(nameof(players));
-                if (playersPerRequest < 1 || playersPerRequest > SteamWebApiClient.MaxPlayerSummariesPerRequest)
-                    throw new ArgumentOutOfRangeException(nameof(playersPerRequest), playersPerRequest, $"'{nameof(playersPerRequest)}' must be at least 1 and at most {SteamWebApiClient.MaxPlayerSummariesPerRequest}.");
-
                 var requests = new List<Task>();
                 var count = players.Count();
                 for (int i = 0; i < count; i += playersPerRequest)
@@ -121,11 +109,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         {
             using (var activity = new StoreActivity(Log, "players"))
             {
-                if (toofzApiClient == null)
-                    throw new ArgumentNullException(nameof(toofzApiClient));
-                if (players == null)
-                    throw new ArgumentNullException(nameof(players));
-
                 var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
                 activity.Report(bulkStore.RowsAffected);
             }
