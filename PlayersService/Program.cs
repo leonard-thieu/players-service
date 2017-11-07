@@ -23,13 +23,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             using (var worker = new WorkerRole(settings))
             {
-                return Application.Run(
+                return Application<IPlayersSettings>.Run(
                     args,
-                    new EnvironmentAdapter(),
                     settings,
                     worker,
                     new PlayersArgsParser(Console.In, Console.Out, Console.Error),
-                    new ServiceBaseAdapter(),
                     Log);
             }
         }
