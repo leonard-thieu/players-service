@@ -44,9 +44,6 @@
         <Component Id="owcE29C0323F1841E760A72449B62AB5D0B" Guid="b3ad119c-3fd2-daf9-0957-23b82604f249">
           <File Id="owfE29C0323F1841E760A72449B62AB5D0B" Source="$(var.SourceDir)\Microsoft.ApplicationInsights.Log4NetAppender.dll" KeyPath="yes" />
         </Component>
-        <Component Id="owcFA00D7145B7D14B89754AE971AE39D75" Guid="daf90fc7-52a9-d05d-b34d-a7438c3d42d5">
-          <File Id="owfFA00D7145B7D14B89754AE971AE39D75" Source="$(var.SourceDir)\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll" KeyPath="yes" />
-        </Component>
         <Component Id="owcADE9A457248959D397C6B092C7CCF78B" Guid="4aac0c53-b1ed-bef0-2706-7a1a9ee332ae">
           <File Id="owfADE9A457248959D397C6B092C7CCF78B" Source="$(var.SourceDir)\Microsoft.Win32.Primitives.dll" KeyPath="yes" />
         </Component>
@@ -65,15 +62,13 @@
         <Component Id="owcF2790E5923B0B020D9E2D80974AFD905" Guid="73e30dc5-03a7-11c2-2d80-832abf4094a9">
           <File Id="owfF2790E5923B0B020D9E2D80974AFD905" Source="$(var.SourceDir)\PlayersService.exe" KeyPath="yes" />
           <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Retrieves player data from Steam." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes">
-            <ServiceConfig xmlns="http://schemas.microsoft.com/wix/UtilExtension"
-                           FirstFailureActionType="restart"
-                           SecondFailureActionType="restart"
-                           ThirdFailureActionType="restart"
-                           RestartServiceDelayInSeconds="30"
-                           ResetPeriodInDays="1" />
+            <ServiceConfig xmlns="http://schemas.microsoft.com/wix/UtilExtension" FirstFailureActionType="restart" SecondFailureActionType="restart" ThirdFailureActionType="restart" RestartServiceDelayInSeconds="30" ResetPeriodInDays="1" />
           </ServiceInstall>
           <ServiceControl Id="sc85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" Start="install" Stop="both" Remove="both" Wait="yes" />
           <File Id="owf2D54FC3E87FA631FA2CAE4A3E9B25978" Source="$(var.SourceDir)\PlayersService.exe.config" CompanionFile="owfF2790E5923B0B020D9E2D80974AFD905" />
+        </Component>
+        <Component Id="owc40B857C5CC2CAC09BD1708FC7761B1BE" Guid="67a53e59-b39b-69b9-7a69-e125255e9c54">
+          <File Id="owf40B857C5CC2CAC09BD1708FC7761B1BE" Source="$(var.SourceDir)\Polly.dll" KeyPath="yes" />
         </Component>
         <Component Id="owcED4CA0C587B1FFB62753FB5DED9C7587" Guid="c81d2020-653a-ed0b-7d1a-b67616f88462">
           <File Id="owfED4CA0C587B1FFB62753FB5DED9C7587" Source="$(var.SourceDir)\protobuf-net.dll" KeyPath="yes" />

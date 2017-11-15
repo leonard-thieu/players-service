@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.Services;
 using Xunit;
@@ -32,8 +33,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             [Fact]
             public void ReturnsCreateSteamApiHandler()
             {
-                // Arrange -> Act
-                var handler = WorkerRole.CreateSteamApiHandler();
+                // Arrange
+                var telemetryClient = new TelemetryClient();
+
+                // Act
+                var handler = WorkerRole.CreateSteamApiHandler(telemetryClient);
 
                 // Assert
                 Assert.IsAssignableFrom<HttpMessageHandler>(handler);
@@ -42,6 +46,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         public class OnStartMethod
         {
+            private readonly TelemetryClient telemetryClient = new TelemetryClient();
+
             [Fact]
             public void ToofzApiUserNameIsNull_ThrowsInvalidOperationException()
             {
@@ -51,7 +57,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                     ToofzApiUserName = null,
                     ToofzApiPassword = new EncryptedSecret("a", 1),
                 };
-                var workerRole = new WorkerRole(settings);
+                var workerRole = new WorkerRole(settings, telemetryClient);
 
                 // Act -> Assert
                 Assert.Throws<InvalidOperationException>(() =>
@@ -69,7 +75,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                     ToofzApiUserName = "",
                     ToofzApiPassword = new EncryptedSecret("a", 1),
                 };
-                var workerRole = new WorkerRole(settings);
+                var workerRole = new WorkerRole(settings, telemetryClient);
 
                 // Act -> Assert
                 Assert.Throws<InvalidOperationException>(() =>
@@ -87,7 +93,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                     ToofzApiUserName = "myUserName",
                     ToofzApiPassword = null,
                 };
-                var workerRole = new WorkerRole(settings);
+                var workerRole = new WorkerRole(settings, telemetryClient);
 
                 // Act -> Assert
                 Assert.Throws<InvalidOperationException>(() =>
@@ -119,7 +125,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
             private class WorkerRoleAdapter : WorkerRole
             {
-                public WorkerRoleAdapter(IPlayersSettings settings) : base(settings) { }
+                public WorkerRoleAdapter(IPlayersSettings settings) : base(settings, new TelemetryClient()) { }
 
                 public Task PublicRunAsyncOverride(CancellationToken cancellationToken) => RunAsyncOverride(cancellationToken);
             }

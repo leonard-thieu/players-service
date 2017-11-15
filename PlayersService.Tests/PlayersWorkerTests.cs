@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights;
 using Moq;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
@@ -14,24 +15,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
     {
         public PlayersWorkerTests()
         {
-            ToofzApiClient = MockToofzApiClient.Object;
-            SteamWebApiClient = MockSteamWebApiClient.Object;
+            worker = new PlayersWorker(telemetryClient);
+            toofzApiClient = mockToofzApiClient.Object;
+            steamWebApiClient = mockSteamWebApiClient.Object;
         }
 
-        internal PlayersWorker Worker { get; set; } = new PlayersWorker();
-        public Mock<IToofzApiClient> MockToofzApiClient { get; set; } = new Mock<IToofzApiClient>();
-        public IToofzApiClient ToofzApiClient { get; set; }
-        public Mock<ISteamWebApiClient> MockSteamWebApiClient { get; set; } = new Mock<ISteamWebApiClient>();
-        public ISteamWebApiClient SteamWebApiClient { get; set; }
-        public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+        private TelemetryClient telemetryClient = new TelemetryClient();
+        private PlayersWorker worker;
+        private Mock<IToofzApiClient> mockToofzApiClient = new Mock<IToofzApiClient>();
+        private IToofzApiClient toofzApiClient;
+        private Mock<ISteamWebApiClient> mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
+        private ISteamWebApiClient steamWebApiClient;
+        private CancellationToken cancellationToken = CancellationToken.None;
 
         public class Constructor
         {
             [Fact]
             public void ReturnsInstance()
             {
-                // Arrange -> Act
-                var worker = new PlayersWorker();
+                // Arrange
+                var telemetryClient = new TelemetryClient();
+
+                // Act
+                var worker = new PlayersWorker(telemetryClient);
 
                 // Assert
                 Assert.IsAssignableFrom<PlayersWorker>(worker);
@@ -45,13 +51,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             {
                 // Arrange
                 var playersEnvelope = new PlayersEnvelope { Players = new List<PlayerDTO>() };
-                MockToofzApiClient
-                    .Setup(c => c.GetPlayersAsync(It.IsAny<GetPlayersParams>(), It.IsAny<IProgress<long>>(), CancellationToken))
+                mockToofzApiClient
+                    .Setup(c => c.GetPlayersAsync(It.IsAny<GetPlayersParams>(), It.IsAny<IProgress<long>>(), cancellationToken))
                     .ReturnsAsync(playersEnvelope);
                 var limit = 100;
 
                 // Act
-                var players = await Worker.GetPlayersAsync(ToofzApiClient, limit, CancellationToken);
+                var players = await worker.GetPlayersAsync(toofzApiClient, limit, cancellationToken);
 
                 // Assert
                 Assert.IsAssignableFrom<IEnumerable<Player>>(players);
@@ -60,8 +66,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         public class UpdatePlayersAsyncMethod : PlayersWorkerTests
         {
-            public List<Player> Players { get; set; } = new List<Player>();
-            public int PlayersPerRequest { get; set; } = 100;
+            private List<Player> players = new List<Player>();
+            private int playersPerRequest = 100;
 
             [Fact]
             public async Task StalePlayersCountGreaterThanPlayersPerRequest_RequestsPlayersInBatches()
@@ -71,21 +77,21 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 {
                     Response = new PlayerSummaries { Players = new List<PlayerSummary>() },
                 };
-                MockSteamWebApiClient
-                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), CancellationToken))
+                mockSteamWebApiClient
+                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), cancellationToken))
                     .ReturnsAsync(playerSummariesEnvelope);
-                Players.AddRange(new[]
+                players.AddRange(new[]
                 {
                     new Player(),
                     new Player(),
                 });
-                PlayersPerRequest = 1;
+                playersPerRequest = 1;
 
                 // Act
-                await Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
+                await worker.UpdatePlayersAsync(steamWebApiClient, players, playersPerRequest, cancellationToken);
 
                 // Assert
-                MockSteamWebApiClient.Verify(s => s.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), CancellationToken), Times.Exactly(2));
+                mockSteamWebApiClient.Verify(s => s.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), cancellationToken), Times.Exactly(2));
             }
 
             [Fact]
@@ -107,14 +113,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                         },
                     },
                 };
-                MockSteamWebApiClient
-                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), CancellationToken))
+                mockSteamWebApiClient
+                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), cancellationToken))
                     .ReturnsAsync(playerSummariesEnvelope);
                 var player = new Player { SteamId = 1 };
-                Players.Add(player);
+                players.Add(player);
 
                 // Act
-                await Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
+                await worker.UpdatePlayersAsync(steamWebApiClient, players, playersPerRequest, cancellationToken);
 
                 // Assert
                 Assert.True(player.Exists == true);
@@ -131,14 +137,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                 {
                     Response = new PlayerSummaries { Players = new List<PlayerSummary>() },
                 };
-                MockSteamWebApiClient
-                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), CancellationToken))
+                mockSteamWebApiClient
+                    .Setup(c => c.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), cancellationToken))
                     .ReturnsAsync(playerSummariesEnvelope);
                 var player = new Player { SteamId = 1 };
-                Players.Add(player);
+                players.Add(player);
 
                 // Act
-                await Worker.UpdatePlayersAsync(SteamWebApiClient, Players, PlayersPerRequest, CancellationToken);
+                await worker.UpdatePlayersAsync(steamWebApiClient, players, playersPerRequest, cancellationToken);
 
 
                 // Assert
@@ -149,22 +155,22 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         public class StorePlayersAsyncMethod : PlayersWorkerTests
         {
-            public List<Player> Players { get; set; } = new List<Player>();
+            private List<Player> players = new List<Player>();
 
             [Fact]
             public async Task StoresPlayers()
             {
                 // Arrange
-                MockToofzApiClient
-                    .Setup(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), CancellationToken))
+                mockToofzApiClient
+                    .Setup(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), cancellationToken))
                     .ReturnsAsync(new BulkStoreDTO());
                 var players = new List<Player>();
 
                 // Act
-                await Worker.StorePlayersAsync(ToofzApiClient, players, CancellationToken);
+                await worker.StorePlayersAsync(toofzApiClient, players, cancellationToken);
 
                 // Assert
-                MockToofzApiClient.Verify(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), CancellationToken), Times.Once);
+                mockToofzApiClient.Verify(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), cancellationToken), Times.Once);
             }
         }
     }

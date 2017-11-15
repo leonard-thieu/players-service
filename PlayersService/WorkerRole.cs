@@ -4,6 +4,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.toofz;
@@ -28,17 +30,17 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             });
         }
 
-        internal static HttpMessageHandler CreateSteamApiHandler()
+        internal static HttpMessageHandler CreateSteamApiHandler(TelemetryClient telemetryClient)
         {
             return HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
                 new LoggingHandler(),
                 new GZipHandler(),
-                new SteamWebApiTransientFaultHandler(),
+                new SteamWebApiTransientFaultHandler(telemetryClient),
             });
         }
 
-        public WorkerRole(IPlayersSettings settings) : base("players", settings) { }
+        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient) { }
 
         private HttpMessageHandler toofzApiHandler;
 
@@ -60,30 +62,41 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
             using (new UpdateActivity(Log, "players"))
+            using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players cycle"))
             {
-                if (Settings.SteamWebApiKey == null)
-                    throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
-
-                var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
-                var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
-                var playersPerUpdate = Settings.PlayersPerUpdate;
-
-                var worker = new PlayersWorker();
-
-                using (var toofzApiClient = new ToofzApiClient(toofzApiHandler, disposeHandler: false))
+                try
                 {
-                    toofzApiClient.BaseAddress = toofzApiBaseAddress;
+                    if (Settings.SteamWebApiKey == null)
+                        throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
 
-                    var players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
+                    var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
+                    var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
+                    var playersPerUpdate = Settings.PlayersPerUpdate;
 
-                    using (var steamWebApiClient = new SteamWebApiClient(CreateSteamApiHandler()))
+                    var worker = new PlayersWorker(TelemetryClient);
+
+                    using (var toofzApiClient = new ToofzApiClient(toofzApiHandler, false, TelemetryClient))
                     {
-                        steamWebApiClient.SteamWebApiKey = steamWebApiKey;
+                        toofzApiClient.BaseAddress = toofzApiBaseAddress;
 
-                        await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
+                        var players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
+
+                        using (var steamWebApiClient = new SteamWebApiClient(CreateSteamApiHandler(TelemetryClient), TelemetryClient))
+                        {
+                            steamWebApiClient.SteamWebApiKey = steamWebApiKey;
+
+                            await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
+                        }
+
+                        await worker.StorePlayersAsync(toofzApiClient, players, cancellationToken).ConfigureAwait(false);
                     }
 
-                    await worker.StorePlayersAsync(toofzApiClient, players, cancellationToken).ConfigureAwait(false);
+                    operation.Telemetry.Success = true;
+                }
+                catch (Exception)
+                {
+                    operation.Telemetry.Success = false;
+                    throw;
                 }
             }
         }

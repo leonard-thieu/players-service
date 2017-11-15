@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.toofz;
 
@@ -12,6 +14,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     internal sealed class PlayersWorker
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
+
+        public PlayersWorker(TelemetryClient telemetryClient)
+        {
+            this.telemetryClient = telemetryClient;
+        }
+
+        private readonly TelemetryClient telemetryClient;
 
         public async Task<IEnumerable<Player>> GetPlayersAsync(
             IToofzApiClient toofzApiClient,
@@ -44,25 +53,36 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             int playersPerRequest,
             CancellationToken cancellationToken)
         {
+            using (var operation = telemetryClient.StartOperation<RequestTelemetry>("Download players"))
             using (var activity = new DownloadActivity(Log, "players"))
             {
-                var requests = new List<Task>();
-                var count = players.Count();
-                for (int i = 0; i < count; i += playersPerRequest)
+                try
                 {
-                    var ids = players
-                        .Skip(i)
-                        .Take(playersPerRequest)
-                        .ToList();
-                    var request = UpdatePlayersAsync(steamWebApiClient, ids, activity, cancellationToken);
-                    requests.Add(request);
-                }
+                    var requests = new List<Task>();
+                    var count = players.Count();
+                    for (int i = 0; i < count; i += playersPerRequest)
+                    {
+                        var ids = players
+                            .Skip(i)
+                            .Take(playersPerRequest)
+                            .ToList();
+                        var request = UpdatePlayersAsync(steamWebApiClient, ids, activity, cancellationToken);
+                        requests.Add(request);
+                    }
 
-                await Task.WhenAll(requests).ConfigureAwait(false);
+                    await Task.WhenAll(requests).ConfigureAwait(false);
+
+                    operation.Telemetry.Success = true;
+                }
+                catch (Exception)
+                {
+                    operation.Telemetry.Success = false;
+                    throw;
+                }
             }
         }
 
-        async Task UpdatePlayersAsync(
+        private async Task UpdatePlayersAsync(
             ISteamWebApiClient steamWebApiClient,
             IEnumerable<Player> players,
             IProgress<long> progress,
@@ -107,10 +127,23 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             IEnumerable<Player> players,
             CancellationToken cancellationToken)
         {
-            using (var activity = new StoreActivity(Log, "players"))
+            using (var operation = telemetryClient.StartOperation<RequestTelemetry>("Store players"))
             {
-                var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
-                activity.Report(bulkStore.RowsAffected);
+                try
+                {
+                    using (var activity = new StoreActivity(Log, "players"))
+                    {
+                        var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
+                        activity.Report(bulkStore.RowsAffected);
+                    }
+
+                    operation.Telemetry.Success = true;
+                }
+                catch (Exception)
+                {
+                    operation.Telemetry.Success = false;
+                    throw;
+                }
             }
         }
     }
