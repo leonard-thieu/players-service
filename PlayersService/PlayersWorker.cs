@@ -128,14 +128,12 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             CancellationToken cancellationToken)
         {
             using (var operation = telemetryClient.StartOperation<RequestTelemetry>("Store players"))
+            using (var activity = new StoreActivity(Log, "players"))
             {
                 try
                 {
-                    using (var activity = new StoreActivity(Log, "players"))
-                    {
-                        var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
-                        activity.Report(bulkStore.RowsAffected);
-                    }
+                    var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
+                    activity.Report(bulkStore.RowsAffected);
 
                     operation.Telemetry.Success = true;
                 }

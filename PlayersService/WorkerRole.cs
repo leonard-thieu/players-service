@@ -61,8 +61,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
-            using (new UpdateActivity(Log, "players"))
             using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players cycle"))
+            using (new UpdateActivity(Log, "players"))
             {
                 try
                 {
