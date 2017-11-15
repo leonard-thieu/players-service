@@ -19,12 +19,6 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <WixExtension Include="WixUtilExtension">
-      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
-      <Name>WixUtilExtension</Name>
-    </WixExtension>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\PlayersService\PlayersService.csproj">
       <Name>PlayersService</Name>
       <Project>{714c9b00-9392-4f2a-872c-3fe575a23d12}</Project>
