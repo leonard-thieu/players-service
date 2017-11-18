@@ -9,8 +9,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
     internal sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {
-        internal const string DefaultLeaderboardsConnectionString = "Data Source=localhost;Initial Catalog=NecroDancer;Integrated Security=SSPI;";
-
         public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter) : base(inReader, outWriter, errorWriter) { }
 
         protected override string EntryAssemblyFileName { get; } = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
@@ -20,7 +18,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             base.OnParsing(settingsType, optionSet, options);
 
             optionSet.Add("players=", GetDescription(settingsType, nameof(Settings.PlayersPerUpdate)), (int players) => options.PlayersPerUpdate = players);
-            optionSet.Add("connection:", GetDescription(settingsType, nameof(Settings.LeaderboardsConnectionString)), connection => options.LeaderboardsConnectionString = connection);
             optionSet.Add("apikey:", GetDescription(settingsType, nameof(Settings.SteamWebApiKey)), apikey => options.SteamWebApiKey = apikey);
         }
 
@@ -36,25 +33,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             if (playersPerUpdate != null)
             {
                 settings.PlayersPerUpdate = playersPerUpdate.Value;
-            }
-
-            #endregion
-
-            #region LeaderboardsConnectionString
-
-            var leaderboardsConnectionString = options.LeaderboardsConnectionString;
-            if (leaderboardsConnectionString == null)
-            {
-                leaderboardsConnectionString = ReadOption("Leaderboards connection string");
-            }
-
-            if (leaderboardsConnectionString != "")
-            {
-                settings.LeaderboardsConnectionString = new EncryptedSecret(leaderboardsConnectionString, iterations);
-            }
-            else if (settings.LeaderboardsConnectionString == null)
-            {
-                settings.LeaderboardsConnectionString = new EncryptedSecret(DefaultLeaderboardsConnectionString, iterations);
             }
 
             #endregion

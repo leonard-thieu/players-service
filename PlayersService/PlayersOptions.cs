@@ -9,10 +9,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// </summary>
         public int? PlayersPerUpdate { get; internal set; }
         /// <summary>
-        /// The connection string used to connect to the leaderboards database.
-        /// </summary>
-        public string LeaderboardsConnectionString { get; internal set; } = "";
-        /// <summary>
         /// A Steam Web API key.
         /// </summary>
         public string SteamWebApiKey { get; internal set; } = "";

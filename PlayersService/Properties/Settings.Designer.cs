@@ -100,6 +100,21 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
         }
         
         /// <summary>
+        /// The connection string used to connect to the leaderboards database.
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("The connection string used to connect to the leaderboards database.")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::toofz.Services.EncryptedSecret LeaderboardsConnectionString {
+            get {
+                return ((global::toofz.Services.EncryptedSecret)(this["LeaderboardsConnectionString"]));
+            }
+            set {
+                this["LeaderboardsConnectionString"] = value;
+            }
+        }
+        
+        /// <summary>
         /// The number of players to update.
         /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
@@ -112,21 +127,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
             }
             set {
                 this["PlayersPerUpdate"] = value;
-            }
-        }
-        
-        /// <summary>
-        /// The connection string used to connect to the leaderboards database.
-        /// </summary>
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsDescriptionAttribute("The connection string used to connect to the leaderboards database.")]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::toofz.Services.EncryptedSecret LeaderboardsConnectionString {
-            get {
-                return ((global::toofz.Services.EncryptedSecret)(this["LeaderboardsConnectionString"]));
-            }
-            set {
-                this["LeaderboardsConnectionString"] = value;
             }
         }
         
