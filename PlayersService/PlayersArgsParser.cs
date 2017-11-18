@@ -9,6 +9,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
     internal sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {
+        internal const string DefaultLeaderboardsConnectionString = "Data Source=localhost;Initial Catalog=NecroDancer;Integrated Security=SSPI;";
+
         public PlayersArgsParser(TextReader inReader, TextWriter outWriter, TextWriter errorWriter) : base(inReader, outWriter, errorWriter) { }
 
         protected override string EntryAssemblyFileName { get; } = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
@@ -18,9 +20,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             base.OnParsing(settingsType, optionSet, options);
 
             optionSet.Add("players=", GetDescription(settingsType, nameof(Settings.PlayersPerUpdate)), (int players) => options.PlayersPerUpdate = players);
-            optionSet.Add("toofz=", GetDescription(settingsType, nameof(Settings.ToofzApiBaseAddress)), api => options.ToofzApiBaseAddress = api);
-            optionSet.Add("username=", GetDescription(settingsType, nameof(Settings.ToofzApiUserName)), username => options.ToofzApiUserName = username);
-            optionSet.Add("password:", GetDescription(settingsType, nameof(Settings.ToofzApiPassword)), password => options.ToofzApiPassword = password);
+            optionSet.Add("connection:", GetDescription(settingsType, nameof(Settings.LeaderboardsConnectionString)), connection => options.LeaderboardsConnectionString = connection);
             optionSet.Add("apikey:", GetDescription(settingsType, nameof(Settings.SteamWebApiKey)), apikey => options.SteamWebApiKey = apikey);
         }
 
@@ -40,41 +40,21 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             #endregion
 
-            #region ToofzApiBaseAddress
+            #region LeaderboardsConnectionString
 
-            var toofzApiBaseAddress = options.ToofzApiBaseAddress;
-            if (!string.IsNullOrEmpty(toofzApiBaseAddress))
+            var leaderboardsConnectionString = options.LeaderboardsConnectionString;
+            if (leaderboardsConnectionString == null)
             {
-                settings.ToofzApiBaseAddress = toofzApiBaseAddress;
+                leaderboardsConnectionString = ReadOption("Leaderboards connection string");
             }
 
-            #endregion
-
-            #region ToofzApiUserName
-
-            var toofzApiUserName = options.ToofzApiUserName;
-            if (!string.IsNullOrEmpty(toofzApiUserName))
+            if (leaderboardsConnectionString != "")
             {
-                settings.ToofzApiUserName = toofzApiUserName;
+                settings.LeaderboardsConnectionString = new EncryptedSecret(leaderboardsConnectionString, iterations);
             }
-            else if (string.IsNullOrEmpty(settings.ToofzApiUserName))
+            else if (settings.LeaderboardsConnectionString == null)
             {
-                settings.ToofzApiUserName = ReadOption("toofz API user name");
-            }
-
-            #endregion
-
-            #region ToofzApiPassword
-
-            var toofzApiPassword = options.ToofzApiPassword;
-            if (ShouldPromptForRequiredSetting(toofzApiPassword, settings.ToofzApiPassword))
-            {
-                toofzApiPassword = ReadOption("toofz API password");
-            }
-
-            if (toofzApiPassword != "")
-            {
-                settings.ToofzApiPassword = new EncryptedSecret(toofzApiPassword, iterations);
+                settings.LeaderboardsConnectionString = new EncryptedSecret(DefaultLeaderboardsConnectionString, iterations);
             }
 
             #endregion

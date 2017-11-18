@@ -36,6 +36,9 @@
     <PackageReference Include="Moq">
       <Version>4.7.145</Version>
     </PackageReference>
+    <PackageReference Include="toofz.TestsShared">
+      <Version>5.0.3</Version>
+    </PackageReference>
     <PackageReference Include="xunit.assert">
       <Version>2.3.1</Version>
     </PackageReference>
@@ -70,7 +73,6 @@
   <ItemGroup>
     <Compile Include="PlayersArgsParserTests.cs" />
     <Compile Include="PlayersWorkerTests.cs" />
-    <Compile Include="StubPlayersSettings.cs" />
     <Compile Include="WorkerRoleTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

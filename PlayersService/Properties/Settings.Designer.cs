@@ -116,49 +116,17 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
         }
         
         /// <summary>
-        /// The base address of toofz API.
+        /// The connection string used to connect to the leaderboards database.
         /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsDescriptionAttribute("The base address of toofz API.")]
+        [global::System.Configuration.SettingsDescriptionAttribute("The connection string used to connect to the leaderboards database.")]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:49603/")]
-        public string ToofzApiBaseAddress {
+        public global::toofz.Services.EncryptedSecret LeaderboardsConnectionString {
             get {
-                return ((string)(this["ToofzApiBaseAddress"]));
+                return ((global::toofz.Services.EncryptedSecret)(this["LeaderboardsConnectionString"]));
             }
             set {
-                this["ToofzApiBaseAddress"] = value;
-            }
-        }
-        
-        /// <summary>
-        /// The user name used to log on to toofz API.
-        /// </summary>
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsDescriptionAttribute("The user name used to log on to toofz API.")]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PlayersService")]
-        public string ToofzApiUserName {
-            get {
-                return ((string)(this["ToofzApiUserName"]));
-            }
-            set {
-                this["ToofzApiUserName"] = value;
-            }
-        }
-        
-        /// <summary>
-        /// The password used to log on to toofz API.
-        /// </summary>
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsDescriptionAttribute("The password used to log on to toofz API.")]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::toofz.Services.EncryptedSecret ToofzApiPassword {
-            get {
-                return ((global::toofz.Services.EncryptedSecret)(this["ToofzApiPassword"]));
-            }
-            set {
-                this["ToofzApiPassword"] = value;
+                this["LeaderboardsConnectionString"] = value;
             }
         }
         
