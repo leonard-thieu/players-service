@@ -5,7 +5,6 @@ using Microsoft.ApplicationInsights;
 using Moq;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
-using toofz.NecroDancer.Leaderboards.toofz;
 using toofz.Services;
 using Xunit;
 
@@ -23,23 +22,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         private readonly Mock<IPlayersSettings> mockSettings = new Mock<IPlayersSettings>();
         private readonly IPlayersSettings settings;
-
-        public class CreateToofzApiClientMethod
-        {
-            [Fact]
-            public void ReturnsInstance()
-            {
-                // Arrange
-                var baseAddress = new Uri("http://example.org/");
-                var telemetryClient = new TelemetryClient();
-
-                // Act
-                var client = WorkerRole.CreateToofzApiClient(baseAddress, telemetryClient);
-
-                // Assert
-                Assert.IsAssignableFrom<IToofzApiClient>(client);
-            }
-        }
 
         public class CreateSteamWebApiClientMethod
         {

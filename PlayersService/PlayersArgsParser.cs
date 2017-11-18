@@ -20,7 +20,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             base.OnParsing(settingsType, optionSet, options);
 
             optionSet.Add("players=", GetDescription(settingsType, nameof(Settings.PlayersPerUpdate)), (int players) => options.PlayersPerUpdate = players);
-            optionSet.Add("toofz=", GetDescription(settingsType, nameof(Settings.ToofzApiBaseAddress)), api => options.ToofzApiBaseAddress = api);
             optionSet.Add("connection:", GetDescription(settingsType, nameof(Settings.LeaderboardsConnectionString)), connection => options.LeaderboardsConnectionString = connection);
             optionSet.Add("apikey:", GetDescription(settingsType, nameof(Settings.SteamWebApiKey)), apikey => options.SteamWebApiKey = apikey);
         }
@@ -37,16 +36,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             if (playersPerUpdate != null)
             {
                 settings.PlayersPerUpdate = playersPerUpdate.Value;
-            }
-
-            #endregion
-
-            #region ToofzApiBaseAddress
-
-            var toofzApiBaseAddress = options.ToofzApiBaseAddress;
-            if (!string.IsNullOrEmpty(toofzApiBaseAddress))
-            {
-                settings.ToofzApiBaseAddress = toofzApiBaseAddress;
             }
 
             #endregion

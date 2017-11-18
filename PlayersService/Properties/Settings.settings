@@ -20,9 +20,6 @@
     <Setting Name="PlayersPerUpdate" Description="The number of players to update." Type="System.Int32" Scope="User">
       <Value Profile="(Default)">500</Value>
     </Setting>
-    <Setting Name="ToofzApiBaseAddress" Description="The base address of toofz API." Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://localhost:49603/</Value>
-    </Setting>
     <Setting Name="LeaderboardsConnectionString" Description="The connection string used to connect to the leaderboards database." Type="toofz.Services.EncryptedSecret" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

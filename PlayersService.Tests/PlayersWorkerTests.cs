@@ -6,7 +6,7 @@ using Microsoft.ApplicationInsights;
 using Moq;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
-using toofz.NecroDancer.Leaderboards.toofz;
+using toofz.TestsShared;
 using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
@@ -16,14 +16,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
         public PlayersWorkerTests()
         {
             worker = new PlayersWorker(telemetryClient);
-            toofzApiClient = mockToofzApiClient.Object;
             steamWebApiClient = mockSteamWebApiClient.Object;
         }
 
         private TelemetryClient telemetryClient = new TelemetryClient();
         private PlayersWorker worker;
-        private Mock<IToofzApiClient> mockToofzApiClient = new Mock<IToofzApiClient>();
-        private IToofzApiClient toofzApiClient;
         private Mock<ISteamWebApiClient> mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
         private ISteamWebApiClient steamWebApiClient;
         private CancellationToken cancellationToken = CancellationToken.None;
@@ -50,14 +47,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task ReturnsPlayers()
             {
                 // Arrange
-                var playersEnvelope = new PlayersEnvelope { Players = new List<PlayerDTO>() };
-                mockToofzApiClient
-                    .Setup(c => c.GetPlayersAsync(It.IsAny<GetPlayersParams>(), It.IsAny<IProgress<long>>(), cancellationToken))
-                    .ReturnsAsync(playersEnvelope);
+                var mockDb = new Mock<ILeaderboardsContext>();
+                var db = mockDb.Object;
+                var mockDbPlayers = new MockDbSet<Player>();
+                mockDb.Setup(d => d.Players).Returns(mockDbPlayers.Object);
                 var limit = 100;
 
                 // Act
-                var players = await worker.GetPlayersAsync(toofzApiClient, limit, cancellationToken);
+                var players = await worker.GetPlayersAsync(db, limit, cancellationToken);
 
                 // Assert
                 Assert.IsAssignableFrom<IEnumerable<Player>>(players);

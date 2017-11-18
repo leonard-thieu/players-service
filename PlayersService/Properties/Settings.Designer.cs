@@ -116,22 +116,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties {
         }
         
         /// <summary>
-        /// The base address of toofz API.
-        /// </summary>
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsDescriptionAttribute("The base address of toofz API.")]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:49603/")]
-        public string ToofzApiBaseAddress {
-            get {
-                return ((string)(this["ToofzApiBaseAddress"]));
-            }
-            set {
-                this["ToofzApiBaseAddress"] = value;
-            }
-        }
-        
-        /// <summary>
         /// The connection string used to connect to the leaderboards database.
         /// </summary>
         [global::System.Configuration.UserScopedSettingAttribute()]

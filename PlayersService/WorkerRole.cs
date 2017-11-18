@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
-using toofz.NecroDancer.Leaderboards.toofz;
 using toofz.Services;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
@@ -18,20 +16,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     internal class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
-
-        internal static IToofzApiClient CreateToofzApiClient(Uri baseAddress, TelemetryClient telemetryClient)
-        {
-            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler
-            {
-                AutomaticDecompression = DecompressionMethods.GZip,
-            }, new DelegatingHandler[]
-            {
-                new LoggingHandler(),
-                new ToofzHttpErrorHandler(),
-            });
-
-            return new ToofzApiClient(handler, false, telemetryClient) { BaseAddress = baseAddress };
-        }
 
         internal static ISteamWebApiClient CreateSteamWebApiClient(string apiKey, TelemetryClient telemetryClient)
         {
@@ -59,7 +43,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     if (Settings.LeaderboardsConnectionString == null)
                         throw new InvalidOperationException($"{nameof(Settings.LeaderboardsConnectionString)} is not set.");
 
-                    var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
                     var playersPerUpdate = Settings.PlayersPerUpdate;
                     var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
                     var leaderboardsConnectionString = Settings.LeaderboardsConnectionString.Decrypt();
@@ -67,9 +50,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     var worker = new PlayersWorker(TelemetryClient);
 
                     IEnumerable<Player> players;
-                    using (var toofzApiClient = CreateToofzApiClient(toofzApiBaseAddress, TelemetryClient))
+                    using (var db = new LeaderboardsContext(leaderboardsConnectionString))
                     {
-                        players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
+                        players = await worker.GetPlayersAsync(db, playersPerUpdate, cancellationToken).ConfigureAwait(false);
                     }
 
                     using (var steamWebApiClient = CreateSteamWebApiClient(steamWebApiKey, TelemetryClient))

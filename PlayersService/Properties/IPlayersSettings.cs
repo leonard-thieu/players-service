@@ -9,10 +9,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties
         /// </summary>
         int PlayersPerUpdate { get; set; }
         /// <summary>
-        /// The base address of toofz API.
-        /// </summary>
-        string ToofzApiBaseAddress { get; set; }
-        /// <summary>
         /// The connection string used to connect to the leaderboards database.
         /// </summary>
         EncryptedSecret LeaderboardsConnectionString { get; set; }

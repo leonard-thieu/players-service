@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,6 @@ using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
-using toofz.NecroDancer.Leaderboards.toofz;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
@@ -22,29 +22,16 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         private readonly TelemetryClient telemetryClient;
 
-        public async Task<IEnumerable<Player>> GetPlayersAsync(
-            IToofzApiClient toofzApiClient,
+        public Task<List<Player>> GetPlayersAsync(
+            ILeaderboardsContext db,
             int limit,
             CancellationToken cancellationToken)
         {
-            var @params = new GetPlayersParams
-            {
-                Limit = limit,
-                Sort = "updated_at",
-            };
-            var response = await toofzApiClient
-                .GetPlayersAsync(@params, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            var players = (from p in response.Players
-                           select new Player
-                           {
-                               SteamId = p.Id,
-                               Name = p.DisplayName,
-                               Avatar = p.Avatar,
-                           })
-                           .ToList();
-
-            return players;
+            return (from p in db.Players.AsNoTracking()
+                    orderby p.LastUpdate
+                    select p)
+                    .Take(() => limit)
+                    .ToListAsync(cancellationToken);
         }
 
         public async Task UpdatePlayersAsync(

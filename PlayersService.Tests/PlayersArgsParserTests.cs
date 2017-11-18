@@ -52,7 +52,6 @@ options:
   --ikey=VALUE          An Application Insights instrumentation key.
   --iterations=VALUE    The number of rounds to execute a key derivation function.
   --players=VALUE       The number of players to update.
-  --toofz=VALUE         The base address of toofz API.
   --connection[=VALUE]  The connection string used to connect to the leaderboards database.
   --apikey[=VALUE]      A Steam Web API key.
 ", outWriter.ToString(), ignoreLineEndingDifferences: true);
@@ -71,23 +70,6 @@ options:
 
                 // Assert
                 Assert.Equal(10, settings.PlayersPerUpdate);
-            }
-
-            #endregion
-
-            #region ToofzApiBaseAddress
-
-            [Fact]
-            public void ToofzIsSpecified_SetsToofzApiBaseAddress()
-            {
-                // Arrange
-                string[] args = { "--toofz=http://localhost/" };
-
-                // Act
-                parser.Parse(args, settings);
-
-                // Assert
-                Assert.Equal("http://localhost/", settings.ToofzApiBaseAddress);
             }
 
             #endregion
