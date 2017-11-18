@@ -123,7 +123,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         }
 
         public async Task StorePlayersAsync(
-            IToofzApiClient toofzApiClient,
+            ILeaderboardsStoreClient storeClient,
             IEnumerable<Player> players,
             CancellationToken cancellationToken)
         {
@@ -132,8 +132,8 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             {
                 try
                 {
-                    var bulkStore = await toofzApiClient.PostPlayersAsync(players, cancellationToken).ConfigureAwait(false);
-                    activity.Report(bulkStore.RowsAffected);
+                    var rowsAffected = await storeClient.BulkUpsertAsync(players, cancellationToken).ConfigureAwait(false);
+                    activity.Report(rowsAffected);
 
                     operation.Telemetry.Success = true;
                 }

@@ -13,13 +13,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Properties
         /// </summary>
         string ToofzApiBaseAddress { get; set; }
         /// <summary>
-        /// The user name used to log on to toofz API.
+        /// The connection string used to connect to the leaderboards database.
         /// </summary>
-        string ToofzApiUserName { get; set; }
-        /// <summary>
-        /// The password used to log on to toofz API.
-        /// </summary>
-        EncryptedSecret ToofzApiPassword { get; set; }
+        EncryptedSecret LeaderboardsConnectionString { get; set; }
         /// <summary>
         /// A Steam Web API key.
         /// </summary>

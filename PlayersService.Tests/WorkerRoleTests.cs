@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
+using Moq;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
+using toofz.NecroDancer.Leaderboards.Steam.WebApi;
+using toofz.NecroDancer.Leaderboards.toofz;
 using toofz.Services;
 using Xunit;
 
@@ -11,115 +13,84 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 {
     public class WorkerRoleTests
     {
-        public class CreateToofzApiHandlerMethod
+        public WorkerRoleTests()
         {
-            [Fact]
-            public void ReturnsToofzApiHandler()
-            {
-                // Arrange
-                var toofzApiUserName = "myUserName";
-                var toofzApiPassword = "myPassword";
-
-                // Act
-                var handler = WorkerRole.CreateToofzApiHandler(toofzApiUserName, toofzApiPassword);
-
-                // Assert
-                Assert.IsAssignableFrom<HttpMessageHandler>(handler);
-            }
+            mockSettings.SetupAllProperties();
+            mockSettings.SetupProperty(s => s.LeaderboardsConnectionString, new EncryptedSecret("a", 1));
+            mockSettings.SetupProperty(s => s.SteamWebApiKey, new EncryptedSecret("a", 1));
+            settings = mockSettings.Object;
         }
 
-        public class CreateSteamApiHandler
+        private readonly Mock<IPlayersSettings> mockSettings = new Mock<IPlayersSettings>();
+        private readonly IPlayersSettings settings;
+
+        public class CreateToofzApiClientMethod
         {
             [Fact]
-            public void ReturnsCreateSteamApiHandler()
+            public void ReturnsInstance()
             {
                 // Arrange
+                var baseAddress = new Uri("http://example.org/");
                 var telemetryClient = new TelemetryClient();
 
                 // Act
-                var handler = WorkerRole.CreateSteamApiHandler(telemetryClient);
+                var client = WorkerRole.CreateToofzApiClient(baseAddress, telemetryClient);
 
                 // Assert
-                Assert.IsAssignableFrom<HttpMessageHandler>(handler);
+                Assert.IsAssignableFrom<IToofzApiClient>(client);
             }
         }
 
-        public class OnStartMethod
+        public class CreateSteamWebApiClientMethod
         {
-            private readonly TelemetryClient telemetryClient = new TelemetryClient();
-
             [Fact]
-            public void ToofzApiUserNameIsNull_ThrowsInvalidOperationException()
+            public void ReturnsInstance()
             {
                 // Arrange
-                var settings = new StubPlayersSettings
-                {
-                    ToofzApiUserName = null,
-                    ToofzApiPassword = new EncryptedSecret("a", 1),
-                };
-                var workerRole = new WorkerRole(settings, telemetryClient);
+                var apiKey = "myApiKey";
+                var telemetryClient = new TelemetryClient();
 
-                // Act -> Assert
-                Assert.Throws<InvalidOperationException>(() =>
-                {
-                    workerRole.Start();
-                });
-            }
+                // Act
+                var client = WorkerRole.CreateSteamWebApiClient(apiKey, telemetryClient);
 
-            [Fact]
-            public void ToofzApiUserNameIsEmpty_ThrowsInvalidOperationException()
-            {
-                // Arrange
-                var settings = new StubPlayersSettings
-                {
-                    ToofzApiUserName = "",
-                    ToofzApiPassword = new EncryptedSecret("a", 1),
-                };
-                var workerRole = new WorkerRole(settings, telemetryClient);
-
-                // Act -> Assert
-                Assert.Throws<InvalidOperationException>(() =>
-                {
-                    workerRole.Start();
-                });
-            }
-
-            [Fact]
-            public void ToofzApiPasswordIsNull_ThrowsInvalidOperationException()
-            {
-                // Arrange
-                var settings = new StubPlayersSettings
-                {
-                    ToofzApiUserName = "myUserName",
-                    ToofzApiPassword = null,
-                };
-                var workerRole = new WorkerRole(settings, telemetryClient);
-
-                // Act -> Assert
-                Assert.Throws<InvalidOperationException>(() =>
-                {
-                    workerRole.Start();
-                });
+                // Assert
+                Assert.IsAssignableFrom<ISteamWebApiClient>(client);
             }
         }
 
-        public class RunAsyncOverrideMethod
+        public class RunAsyncOverrideMethod : WorkerRoleTests
         {
+            public RunAsyncOverrideMethod()
+            {
+                worker = new WorkerRoleAdapter(settings);
+            }
+
+            private readonly CancellationToken cancellationToken = CancellationToken.None;
+            private readonly WorkerRoleAdapter worker;
+
             [Fact]
             public async Task SteamWebApiKeyIsNull_ThrowsInvalidOperationException()
             {
                 // Arrange
-                var settings = new StubPlayersSettings
-                {
-                    SteamWebApiKey = null,
-                };
-                var workerRole = new WorkerRoleAdapter(settings);
-                var cancellationToken = CancellationToken.None;
+                mockSettings.SetupProperty(s => s.SteamWebApiKey, null);
 
                 // Act -> Assert
                 await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 {
-                    return workerRole.PublicRunAsyncOverride(cancellationToken);
+                    return worker.PublicRunAsyncOverride(cancellationToken);
+                });
+            }
+
+            [Fact]
+            public async Task LeaderboardsConnectionStringIsNull_ThrowsInvalidOperationException()
+            {
+                // Arrange
+                mockSettings.SetupProperty(s => s.LeaderboardsConnectionString, null);
+
+                // Act -> Assert
+                await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                {
+                    return worker.PublicRunAsyncOverride(cancellationToken);
                 });
             }
 

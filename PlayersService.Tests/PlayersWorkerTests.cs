@@ -155,22 +155,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         public class StorePlayersAsyncMethod : PlayersWorkerTests
         {
+            public StorePlayersAsyncMethod()
+            {
+                storeClient = mockStoreClient.Object;
+            }
+
+            private Mock<ILeaderboardsStoreClient> mockStoreClient = new Mock<ILeaderboardsStoreClient>();
+            private ILeaderboardsStoreClient storeClient;
             private List<Player> players = new List<Player>();
 
             [Fact]
             public async Task StoresPlayers()
             {
                 // Arrange
-                mockToofzApiClient
-                    .Setup(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), cancellationToken))
-                    .ReturnsAsync(new BulkStoreDTO());
                 var players = new List<Player>();
+                mockStoreClient
+                    .Setup(c => c.BulkUpsertAsync(players, cancellationToken))
+                    .ReturnsAsync(players.Count);
 
                 // Act
-                await worker.StorePlayersAsync(toofzApiClient, players, cancellationToken);
+                await worker.StorePlayersAsync(storeClient, players, cancellationToken);
 
                 // Assert
-                mockToofzApiClient.Verify(c => c.PostPlayersAsync(It.IsAny<IEnumerable<Player>>(), cancellationToken), Times.Once);
+                mockStoreClient.Verify(c => c.BulkUpsertAsync(players, cancellationToken), Times.Once);
             }
         }
     }

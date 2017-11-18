@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -17,47 +19,33 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        internal static HttpMessageHandler CreateToofzApiHandler(string toofzApiUserName, string toofzApiPassword)
+        internal static IToofzApiClient CreateToofzApiClient(Uri baseAddress, TelemetryClient telemetryClient)
         {
-            return HttpClientFactory.CreatePipeline(new WebRequestHandler
+            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip,
             }, new DelegatingHandler[]
             {
                 new LoggingHandler(),
                 new ToofzHttpErrorHandler(),
-                new OAuth2Handler(toofzApiUserName, toofzApiPassword),
             });
+
+            return new ToofzApiClient(handler, false, telemetryClient) { BaseAddress = baseAddress };
         }
 
-        internal static HttpMessageHandler CreateSteamApiHandler(TelemetryClient telemetryClient)
+        internal static ISteamWebApiClient CreateSteamWebApiClient(string apiKey, TelemetryClient telemetryClient)
         {
-            return HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
             {
                 new LoggingHandler(),
                 new GZipHandler(),
                 new SteamWebApiTransientFaultHandler(telemetryClient),
             });
+
+            return new SteamWebApiClient(handler, telemetryClient) { SteamWebApiKey = apiKey };
         }
 
         public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient) { }
-
-        private HttpMessageHandler toofzApiHandler;
-
-        protected override void OnStart(string[] args)
-        {
-            if (string.IsNullOrEmpty(Settings.ToofzApiUserName))
-                throw new InvalidOperationException($"{nameof(Settings.ToofzApiUserName)} is not set.");
-            if (Settings.ToofzApiPassword == null)
-                throw new InvalidOperationException($"{nameof(Settings.ToofzApiPassword)} is not set.");
-
-            var toofzApiUserName = Settings.ToofzApiUserName;
-            var toofzApiPassword = Settings.ToofzApiPassword.Decrypt();
-
-            toofzApiHandler = CreateToofzApiHandler(toofzApiUserName, toofzApiPassword);
-
-            base.OnStart(args);
-        }
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
@@ -68,27 +56,31 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                 {
                     if (Settings.SteamWebApiKey == null)
                         throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
+                    if (Settings.LeaderboardsConnectionString == null)
+                        throw new InvalidOperationException($"{nameof(Settings.LeaderboardsConnectionString)} is not set.");
 
                     var toofzApiBaseAddress = new Uri(Settings.ToofzApiBaseAddress);
-                    var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
                     var playersPerUpdate = Settings.PlayersPerUpdate;
+                    var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
+                    var leaderboardsConnectionString = Settings.LeaderboardsConnectionString.Decrypt();
 
                     var worker = new PlayersWorker(TelemetryClient);
 
-                    using (var toofzApiClient = new ToofzApiClient(toofzApiHandler, false, TelemetryClient))
+                    IEnumerable<Player> players;
+                    using (var toofzApiClient = CreateToofzApiClient(toofzApiBaseAddress, TelemetryClient))
                     {
-                        toofzApiClient.BaseAddress = toofzApiBaseAddress;
+                        players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
+                    }
 
-                        var players = await worker.GetPlayersAsync(toofzApiClient, playersPerUpdate, cancellationToken).ConfigureAwait(false);
+                    using (var steamWebApiClient = CreateSteamWebApiClient(steamWebApiKey, TelemetryClient))
+                    {
+                        await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
+                    }
 
-                        using (var steamWebApiClient = new SteamWebApiClient(CreateSteamApiHandler(TelemetryClient), TelemetryClient))
-                        {
-                            steamWebApiClient.SteamWebApiKey = steamWebApiKey;
-
-                            await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
-                        }
-
-                        await worker.StorePlayersAsync(toofzApiClient, players, cancellationToken).ConfigureAwait(false);
+                    using (var connection = new SqlConnection(leaderboardsConnectionString))
+                    {
+                        var storeClient = new LeaderboardsStoreClient(connection);
+                        await worker.StorePlayersAsync(storeClient, players, cancellationToken).ConfigureAwait(false);
                     }
 
                     operation.Telemetry.Success = true;
