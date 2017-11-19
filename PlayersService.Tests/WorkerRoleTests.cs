@@ -18,37 +18,18 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             mockSettings.SetupProperty(s => s.LeaderboardsConnectionString, new EncryptedSecret("a", 1));
             mockSettings.SetupProperty(s => s.SteamWebApiKey, new EncryptedSecret("a", 1));
             settings = mockSettings.Object;
+            telemetryClient = new TelemetryClient();
+            worker = new WorkerRoleAdapter(settings, telemetryClient);
         }
 
         private readonly Mock<IPlayersSettings> mockSettings = new Mock<IPlayersSettings>();
         private readonly IPlayersSettings settings;
-
-        public class CreateSteamWebApiClientMethod
-        {
-            [Fact]
-            public void ReturnsInstance()
-            {
-                // Arrange
-                var apiKey = "myApiKey";
-                var telemetryClient = new TelemetryClient();
-
-                // Act
-                var client = WorkerRole.CreateSteamWebApiClient(apiKey, telemetryClient);
-
-                // Assert
-                Assert.IsAssignableFrom<ISteamWebApiClient>(client);
-            }
-        }
+        private readonly TelemetryClient telemetryClient;
+        private readonly WorkerRoleAdapter worker;
 
         public class RunAsyncOverrideMethod : WorkerRoleTests
         {
-            public RunAsyncOverrideMethod()
-            {
-                worker = new WorkerRoleAdapter(settings);
-            }
-
             private readonly CancellationToken cancellationToken = CancellationToken.None;
-            private readonly WorkerRoleAdapter worker;
 
             [Fact]
             public async Task SteamWebApiKeyIsNull_ThrowsInvalidOperationException()
@@ -75,13 +56,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                     return worker.PublicRunAsyncOverride(cancellationToken);
                 });
             }
+        }
 
-            private class WorkerRoleAdapter : WorkerRole
+        public class CreateSteamWebApiClientMethod : WorkerRoleTests
+        {
+            [Fact]
+            public void ReturnsInstance()
             {
-                public WorkerRoleAdapter(IPlayersSettings settings) : base(settings, new TelemetryClient()) { }
+                // Arrange
+                var apiKey = "myApiKey";
 
-                public Task PublicRunAsyncOverride(CancellationToken cancellationToken) => RunAsyncOverride(cancellationToken);
+                // Act
+                var client = worker.CreateSteamWebApiClient(apiKey);
+
+                // Assert
+                Assert.IsAssignableFrom<ISteamWebApiClient>(client);
             }
+        }
+
+        private class WorkerRoleAdapter : WorkerRole
+        {
+            public WorkerRoleAdapter(IPlayersSettings settings, TelemetryClient telemetryClient) : base(settings, telemetryClient) { }
+
+            public Task PublicRunAsyncOverride(CancellationToken cancellationToken) => RunAsyncOverride(cancellationToken);
         }
     }
 }

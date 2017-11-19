@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
+using Polly;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.Services;
@@ -16,18 +17,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     internal class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
-
-        internal static ISteamWebApiClient CreateSteamWebApiClient(string apiKey, TelemetryClient telemetryClient)
-        {
-            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
-            {
-                new LoggingHandler(),
-                new GZipHandler(),
-                new SteamWebApiTransientFaultHandler(telemetryClient),
-            });
-
-            return new SteamWebApiClient(handler, telemetryClient) { SteamWebApiKey = apiKey };
-        }
 
         public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient) { }
 
@@ -55,7 +44,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                         players = await worker.GetPlayersAsync(db, playersPerUpdate, cancellationToken).ConfigureAwait(false);
                     }
 
-                    using (var steamWebApiClient = CreateSteamWebApiClient(steamWebApiKey, TelemetryClient))
+                    using (var steamWebApiClient = CreateSteamWebApiClient(steamWebApiKey))
                     {
                         await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
                     }
@@ -74,6 +63,29 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     throw;
                 }
             }
+        }
+
+        internal ISteamWebApiClient CreateSteamWebApiClient(string apiKey)
+        {
+            var policy = SteamWebApiClient
+                .GetRetryStrategy()
+                .WaitAndRetryAsync(
+                    3,
+                    ExponentialBackoff.GetSleepDurationProvider(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2)),
+                    (ex, duration) =>
+                    {
+                        TelemetryClient.TrackException(ex);
+                        if (Log.IsDebugEnabled) { Log.Debug($"Retrying in {duration}...", ex); }
+                    });
+
+            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+            {
+                new LoggingHandler(),
+                new GZipHandler(),
+                new TransientFaultHandler(policy),
+            });
+
+            return new SteamWebApiClient(handler, TelemetryClient) { SteamWebApiKey = apiKey };
         }
     }
 }
