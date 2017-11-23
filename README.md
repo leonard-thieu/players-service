@@ -6,7 +6,7 @@
 ## Overview
 
 **toofz Players Service** is a backend service that handles updating [Crypt of the NecroDancer](http://necrodancer.com/) players for [toofz API](https://api.toofz.com/). 
-It runs as a service that polls [Steam Web API](https://partner.steamgames.com/doc/webapi_overview) at regular intervals to provide up-to-date data.
+It polls [Steam Web API](https://partner.steamgames.com/doc/webapi_overview) at regular intervals to provide up-to-date data.
 
 ---
 
