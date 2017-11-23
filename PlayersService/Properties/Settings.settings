@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="toofz.NecroDancer.Leaderboards.PlayersService.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="Version" Description="The version of the settings file format." Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">1</Value>
-    </Setting>
     <Setting Name="UpdateInterval" Description="The minimum amount of time that should pass between each cycle." Type="System.TimeSpan" Scope="User">
       <Value Profile="(Default)">00:00:30</Value>
     </Setting>
