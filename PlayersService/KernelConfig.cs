@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Net.Http;
 using log4net;
 using Microsoft.ApplicationInsights;
@@ -53,7 +52,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     throw new InvalidOperationException($"{nameof(Settings.LeaderboardsConnectionString)} is not set.");
 
                 return settings.LeaderboardsConnectionString.Decrypt();
-            }).WhenInjectedInto(typeof(LeaderboardsContext), typeof(SqlConnection));
+            }).WhenInjectedInto(typeof(LeaderboardsContext), typeof(LeaderboardsStoreClient));
 
             kernel.Bind<ILeaderboardsContext>().To<LeaderboardsContext>().InParentScope();
             kernel.Bind<ILeaderboardsStoreClient>().To<LeaderboardsStoreClient>().InParentScope();
