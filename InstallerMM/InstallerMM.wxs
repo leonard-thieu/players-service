@@ -65,6 +65,12 @@
         <Component Id="owc3FC8434C1A84605AEEBC6A100CA2F3E1" Guid="47d7e276-db6d-424e-d797-1a69e1e24b3b">
           <File Id="owf3FC8434C1A84605AEEBC6A100CA2F3E1" Source="$(var.SourceDir)\Newtonsoft.Json.dll" KeyPath="yes" />
         </Component>
+        <Component Id="owc2225FD4C4CB1BAEDAB29A27C480A5AF2" Guid="542b6bfa-6724-2ca0-e7e0-a6fa6558a561">
+          <File Id="owf2225FD4C4CB1BAEDAB29A27C480A5AF2" Source="$(var.SourceDir)\Ninject.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="owcDCC71C5143BAFEE231B8C41ACB36DA33" Guid="18b7ed6c-b172-eada-c2f6-a1cb1942657e">
+          <File Id="owfDCC71C5143BAFEE231B8C41ACB36DA33" Source="$(var.SourceDir)\Ninject.Extensions.NamedScope.dll" KeyPath="yes" />
+        </Component>
         <Component Id="owcF2790E5923B0B020D9E2D80974AFD905" Guid="73e30dc5-03a7-11c2-2d80-832abf4094a9">
           <File Id="owfF2790E5923B0B020D9E2D80974AFD905" Source="$(var.SourceDir)\PlayersService.exe" KeyPath="yes" />
           <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Retrieves player data from Steam." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes" />
