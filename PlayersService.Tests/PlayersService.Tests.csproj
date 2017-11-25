@@ -73,7 +73,6 @@
   <ItemGroup>
     <Compile Include="PlayersArgsParserTests.cs" />
     <Compile Include="PlayersWorkerTests.cs" />
-    <Compile Include="WorkerRoleTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
