@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
-using Polly;
+using Ninject;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.Services;
@@ -18,74 +15,72 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient) { }
+        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient)
+        {
+            kernel = KernelConfig.CreateKernel(telemetryClient);
+        }
+
+        private readonly IKernel kernel;
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
             using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players cycle"))
-            using (new UpdateActivity(Log, "players"))
+            using (new UpdateActivity(Log, "players cycle"))
             {
                 try
                 {
-                    if (Settings.SteamWebApiKey == null)
-                        throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
-                    if (Settings.LeaderboardsConnectionString == null)
-                        throw new InvalidOperationException($"{nameof(Settings.LeaderboardsConnectionString)} is not set.");
-
-                    var playersPerUpdate = Settings.PlayersPerUpdate;
-                    var steamWebApiKey = Settings.SteamWebApiKey.Decrypt();
-                    var leaderboardsConnectionString = Settings.LeaderboardsConnectionString.Decrypt();
-
-                    var worker = new PlayersWorker(TelemetryClient);
-
-                    IEnumerable<Player> players;
-                    using (var db = new LeaderboardsContext(leaderboardsConnectionString))
-                    {
-                        players = await worker.GetPlayersAsync(db, playersPerUpdate, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    using (var steamWebApiClient = CreateSteamWebApiClient(steamWebApiKey))
-                    {
-                        await worker.UpdatePlayersAsync(steamWebApiClient, players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    using (var connection = new SqlConnection(leaderboardsConnectionString))
-                    {
-                        var storeClient = new LeaderboardsStoreClient(connection);
-                        await worker.StorePlayersAsync(storeClient, players, cancellationToken).ConfigureAwait(false);
-                    }
+                    await UpdatePlayersAsync(cancellationToken).ConfigureAwait(false);
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception)
+                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
                 {
-                    operation.Telemetry.Success = false;
+                    // Unreachable
                     throw;
                 }
             }
         }
 
-        internal ISteamWebApiClient CreateSteamWebApiClient(string apiKey)
+        private async Task UpdatePlayersAsync(CancellationToken cancellationToken)
         {
-            var policy = SteamWebApiClient
-                .GetRetryStrategy()
-                .WaitAndRetryAsync(
-                    3,
-                    ExponentialBackoff.GetSleepDurationProvider(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2)),
-                    (ex, duration) =>
-                    {
-                        TelemetryClient.TrackException(ex);
-                        if (Log.IsDebugEnabled) { Log.Debug($"Retrying in {duration}...", ex); }
-                    });
-
-            var handler = HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+            var worker = kernel.Get<PlayersWorker>();
+            using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players"))
+            using (new UpdateActivity(Log, "players"))
             {
-                new LoggingHandler(),
-                new GZipHandler(),
-                new TransientFaultHandler(policy),
-            });
+                try
+                {
+                    var players = await worker.GetPlayersAsync(Settings.PlayersPerUpdate, cancellationToken).ConfigureAwait(false);
+                    await worker.UpdatePlayersAsync(players, SteamWebApiClient.MaxPlayerSummariesPerRequest, cancellationToken).ConfigureAwait(false);
+                    await worker.StorePlayersAsync(players, cancellationToken).ConfigureAwait(false);
 
-            return new SteamWebApiClient(handler, TelemetryClient) { SteamWebApiKey = apiKey };
+                    operation.Telemetry.Success = true;
+                }
+                catch (HttpRequestStatusException ex)
+                {
+                    TelemetryClient.TrackException(ex);
+                    Log.Error("Failed to complete run due to an error.", ex);
+                    operation.Telemetry.Success = false;
+                }
+                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
+                {
+                    // Unreachable
+                    throw;
+                }
+                finally
+                {
+                    kernel.Release(worker);
+                }
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                kernel.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

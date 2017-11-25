@@ -15,15 +15,24 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
 
-        public PlayersWorker(TelemetryClient telemetryClient)
+        public PlayersWorker(
+            ILeaderboardsContext db,
+            ISteamWebApiClient steamWebApiClient,
+            ILeaderboardsStoreClient storeClient,
+            TelemetryClient telemetryClient)
         {
+            this.db = db;
+            this.steamWebApiClient = steamWebApiClient;
+            this.storeClient = storeClient;
             this.telemetryClient = telemetryClient;
         }
 
+        private readonly ILeaderboardsContext db;
+        private readonly ISteamWebApiClient steamWebApiClient;
+        private readonly ILeaderboardsStoreClient storeClient;
         private readonly TelemetryClient telemetryClient;
 
         public Task<List<Player>> GetPlayersAsync(
-            ILeaderboardsContext db,
             int limit,
             CancellationToken cancellationToken)
         {
@@ -35,7 +44,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         }
 
         public async Task UpdatePlayersAsync(
-            ISteamWebApiClient steamWebApiClient,
             IEnumerable<Player> players,
             int playersPerRequest,
             CancellationToken cancellationToken)
@@ -53,7 +61,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                             .Skip(i)
                             .Take(playersPerRequest)
                             .ToList();
-                        var request = UpdatePlayersAsync(steamWebApiClient, ids, activity, cancellationToken);
+                        var request = UpdatePlayersAsync(ids, activity, cancellationToken);
                         requests.Add(request);
                     }
 
@@ -61,16 +69,15 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception)
+                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
                 {
-                    operation.Telemetry.Success = false;
+                    // Unreachable
                     throw;
                 }
             }
         }
 
         private async Task UpdatePlayersAsync(
-            ISteamWebApiClient steamWebApiClient,
             IEnumerable<Player> players,
             IProgress<long> progress,
             CancellationToken cancellationToken)
@@ -110,7 +117,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         }
 
         public async Task StorePlayersAsync(
-            ILeaderboardsStoreClient storeClient,
             IEnumerable<Player> players,
             CancellationToken cancellationToken)
         {
@@ -124,9 +130,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception)
+                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
                 {
-                    operation.Telemetry.Success = false;
+                    // Unreachable
                     throw;
                 }
             }
