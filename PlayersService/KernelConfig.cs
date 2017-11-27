@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Data.Entity.Infrastructure;
 using System.Net.Http;
 using log4net;
 using Microsoft.ApplicationInsights;
 using Ninject;
 using Ninject.Extensions.NamedScope;
+using Ninject.Syntax;
 using Polly;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
@@ -19,13 +21,18 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// Creates the kernel that will manage your application.
         /// </summary>
         /// <returns>The created kernel.</returns>
-        public static IKernel CreateKernel(TelemetryClient telemetryClient)
+        public static IKernel CreateKernel(IPlayersSettings settings, TelemetryClient telemetryClient)
         {
             var kernel = new StandardKernel();
             try
             {
-                kernel.Bind<TelemetryClient>().ToConstant(telemetryClient);
+                kernel.Bind<IPlayersSettings>()
+                      .ToConstant(settings);
+                kernel.Bind<TelemetryClient>()
+                      .ToConstant(telemetryClient);
+
                 RegisterServices(kernel);
+
                 return kernel;
             }
             catch
@@ -41,61 +48,93 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(StandardKernel kernel)
         {
-            kernel.Bind<ILog>().ToConstant(Log);
-            kernel.Bind<IPlayersSettings>().ToConstant(Settings.Default);
+            kernel.Bind<ILog>()
+                  .ToConstant(Log);
 
-            kernel.Bind<string>().ToMethod(c =>
-            {
-                var settings = c.Kernel.Get<IPlayersSettings>();
+            kernel.Bind<string>()
+                  .ToMethod(c =>
+                  {
+                      var settings = c.Kernel.Get<IPlayersSettings>();
 
-                if (settings.LeaderboardsConnectionString == null)
-                    throw new InvalidOperationException($"{nameof(Settings.LeaderboardsConnectionString)} is not set.");
+                      if (settings.LeaderboardsConnectionString == null)
+                      {
+                          var connectionFactory = new LocalDbConnectionFactory("mssqllocaldb");
+                          using (var connection = connectionFactory.CreateConnection("NecroDancer"))
+                          {
+                              settings.LeaderboardsConnectionString = new EncryptedSecret(connection.ConnectionString, settings.KeyDerivationIterations);
+                              settings.Save();
+                          }
+                      }
 
-                return settings.LeaderboardsConnectionString.Decrypt();
-            }).WhenInjectedInto(typeof(LeaderboardsContext), typeof(LeaderboardsStoreClient));
+                      return settings.LeaderboardsConnectionString.Decrypt();
+                  })
+                  .WhenInjectedInto(typeof(LeaderboardsContext), typeof(LeaderboardsStoreClient));
 
-            kernel.Bind<ILeaderboardsContext>().To<LeaderboardsContext>().InParentScope();
-            kernel.Bind<ILeaderboardsStoreClient>().To<LeaderboardsStoreClient>().InParentScope();
+            kernel.Bind<ILeaderboardsContext>()
+                  .To<LeaderboardsContext>()
+                  .InParentScope();
+
+            kernel.Bind<ILeaderboardsStoreClient>()
+                  .To<LeaderboardsStoreClient>()
+                  .InParentScope();
 
             RegisterSteamWebApiClient(kernel);
 
-            kernel.Bind<PlayersWorker>().ToSelf().InScope(c => c);
+            kernel.Bind<PlayersWorker>()
+                  .ToSelf()
+                  .InScope(c => c);
         }
+
+        #region SteamWebApiClient
 
         private static void RegisterSteamWebApiClient(StandardKernel kernel)
         {
-            kernel.Bind<HttpMessageHandler>().ToMethod(c =>
-            {
-                var telemetryClient = c.Kernel.Get<TelemetryClient>();
-                var log = c.Kernel.Get<ILog>();
+            kernel.Bind<HttpMessageHandler>()
+                  .ToMethod(c =>
+                  {
+                      var telemetryClient = c.Kernel.Get<TelemetryClient>();
+                      var log = c.Kernel.Get<ILog>();
 
-                var policy = SteamWebApiClient
-                    .GetRetryStrategy()
-                    .WaitAndRetryAsync(
-                        3,
-                        ExponentialBackoff.GetSleepDurationProvider(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2)),
-                        (ex, duration) =>
-                        {
-                            telemetryClient.TrackException(ex);
-                            if (log.IsDebugEnabled) { log.Debug($"Retrying in {duration}...", ex); }
-                        });
+                      return CreateSteamWebApiClientHandler(new WebRequestHandler(), log, telemetryClient);
+                  })
+                .WhenInjectedInto(typeof(SteamWebApiClient))
+                .InParentScope();
+            kernel.Bind<ISteamWebApiClient>()
+                  .To<SteamWebApiClient>()
+                  .WhenSteamWebApiKeyIsSet()
+                  .InParentScope()
+                  .WithPropertyValue(nameof(SteamWebApiClient.SteamWebApiKey), c => c.Kernel.Get<IPlayersSettings>().SteamWebApiKey.Decrypt());
+        }
 
-                return HttpClientFactory.CreatePipeline(new WebRequestHandler(), new DelegatingHandler[]
+        internal static HttpMessageHandler CreateSteamWebApiClientHandler(WebRequestHandler innerHandler, ILog log, TelemetryClient telemetryClient)
+        {
+            var policy = SteamWebApiClient
+                .GetRetryStrategy()
+                .WaitAndRetryAsync(
+                3,
+                ExponentialBackoff.GetSleepDurationProvider(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2)),
+                (ex, duration) =>
                 {
-                    new LoggingHandler(),
-                    new GZipHandler(),
-                    new TransientFaultHandler(policy),
+                    telemetryClient.TrackException(ex);
+                    if (log.IsDebugEnabled) { log.Debug($"Retrying in {duration}...", ex); }
                 });
-            }).WhenInjectedInto(typeof(SteamWebApiClient)).InParentScope();
-            kernel.Bind<ISteamWebApiClient>().To<SteamWebApiClient>().InParentScope().WithPropertyValue(nameof(SteamWebApiClient.SteamWebApiKey), c =>
+
+            return HttpClientFactory.CreatePipeline(innerHandler, new DelegatingHandler[]
             {
-                var settings = c.Kernel.Get<IPlayersSettings>();
-
-                if (settings.SteamWebApiKey == null)
-                    throw new InvalidOperationException($"{nameof(Settings.SteamWebApiKey)} is not set.");
-
-                return settings.SteamWebApiKey.Decrypt();
+                new LoggingHandler(),
+                new GZipHandler(),
+                new TransientFaultHandler(policy),
             });
+        }
+
+        #endregion
+    }
+
+    internal static class IBindingWhenSyntaxExtensions
+    {
+        public static IBindingInNamedWithOrOnSyntax<T> WhenSteamWebApiKeyIsSet<T>(this IBindingWhenSyntax<T> binding)
+        {
+            return binding.When(r => r.ParentContext.Kernel.Get<IPlayersSettings>().SteamWebApiKey != null);
         }
     }
 }

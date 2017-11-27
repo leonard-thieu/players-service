@@ -17,7 +17,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
         public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient)
         {
-            kernel = KernelConfig.CreateKernel(telemetryClient);
+            kernel = KernelConfig.CreateKernel(settings, telemetryClient);
         }
 
         private readonly IKernel kernel;
