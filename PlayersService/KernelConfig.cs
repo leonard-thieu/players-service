@@ -76,6 +76,10 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
             kernel.Bind<ILeaderboardsStoreClient>()
                   .To<LeaderboardsStoreClient>()
+                  .WhenSteamWebApiKeyIsSet()
+                  .InParentScope();
+            kernel.Bind<ILeaderboardsStoreClient>()
+                  .To<FakeLeaderboardsStoreClient>()
                   .InParentScope();
 
             RegisterSteamWebApiClient(kernel);
@@ -104,6 +108,10 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                   .WhenSteamWebApiKeyIsSet()
                   .InParentScope()
                   .WithPropertyValue(nameof(SteamWebApiClient.SteamWebApiKey), c => c.Kernel.Get<IPlayersSettings>().SteamWebApiKey.Decrypt());
+
+            kernel.Bind<ISteamWebApiClient>()
+                  .To<FakeSteamWebApiClient>()
+                  .InParentScope();
         }
 
         internal static HttpMessageHandler CreateSteamWebApiClientHandler(WebRequestHandler innerHandler, ILog log, TelemetryClient telemetryClient)
