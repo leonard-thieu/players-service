@@ -6,7 +6,6 @@ using Microsoft.ApplicationInsights;
 using Moq;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
-using toofz.TestsShared;
 using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
@@ -51,8 +50,9 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             public async Task ReturnsPlayers()
             {
                 // Arrange
-                var mockDbPlayers = new MockDbSet<Player>();
-                mockDb.Setup(d => d.Players).Returns(mockDbPlayers.Object);
+                var dbPlayersInner = new List<Player>();
+                var dbPlayers = new FakeDbSet<Player>(dbPlayersInner);
+                mockDb.Setup(d => d.Players).Returns(dbPlayers);
                 var limit = 100;
 
                 // Act
