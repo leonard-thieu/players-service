@@ -8,6 +8,7 @@ using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
+using static toofz.NecroDancer.Leaderboards.PlayersService.Util;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
@@ -69,7 +70,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
+                catch (Exception) when (FailTelemetry(operation.Telemetry))
                 {
                     // Unreachable
                     throw;
@@ -130,7 +131,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
+                catch (Exception) when (FailTelemetry(operation.Telemetry))
                 {
                     // Unreachable
                     throw;

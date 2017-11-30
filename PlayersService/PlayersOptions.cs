@@ -7,10 +7,10 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// <summary>
         /// The number of players to update.
         /// </summary>
-        public int? PlayersPerUpdate { get; internal set; }
+        public int? PlayersPerUpdate { get; set; }
         /// <summary>
         /// A Steam Web API key.
         /// </summary>
-        public string SteamWebApiKey { get; internal set; } = "";
+        public string SteamWebApiKey { get; set; } = "";
     }
 }

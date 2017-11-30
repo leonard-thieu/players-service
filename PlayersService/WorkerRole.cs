@@ -8,16 +8,19 @@ using Ninject;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.Services;
+using static toofz.NecroDancer.Leaderboards.PlayersService.Util;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    internal class WorkerRole : WorkerRoleBase<IPlayersSettings>
+    internal sealed class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : base("players", settings, telemetryClient)
+        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : this(settings, telemetryClient, null) { }
+
+        internal WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient, IKernel kernel) : base("players", settings, telemetryClient)
         {
-            kernel = KernelConfig.CreateKernel(settings, telemetryClient);
+            this.kernel = kernel ?? KernelConfig.CreateKernel(settings, telemetryClient);
         }
 
         private readonly IKernel kernel;
@@ -39,7 +42,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
+                catch (Exception) when (FailTelemetry(operation.Telemetry))
                 {
                     // Unreachable
                     throw;
@@ -67,7 +70,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                     Log.Error("Failed to complete run due to an error.", ex);
                     operation.Telemetry.Success = false;
                 }
-                catch (Exception) when (Util.FailTelemetry(operation.Telemetry))
+                catch (Exception) when (FailTelemetry(operation.Telemetry))
                 {
                     // Unreachable
                     throw;
