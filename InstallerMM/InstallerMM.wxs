@@ -2,7 +2,13 @@
 <?include ..\Installer\Code\Configuration.wxi?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <?define ComponentRules="OneToOne"?>
+  <!--
+    Workaround to get Files and Folders support in IsWix. IsWix does not support WiX variables so the path to 
+    the Debug TargetDir is hardcoded. IsWiX also happens to incorrectly only use the first instance of a 
+    custom variable so SourceDir can be redefined to the correct directory for building.
+  -->
   <?define SourceDir="..\PlayersService\bin\Debug"?>
+  <?undef SourceDir?>
   <?define SourceDir="$(var.PlayersService.TargetDir)"?>
   <Module Id="InstallerMM" Language="1033" Version="1.0.0.0">
     <Package Id="e6f2afbc-b5b0-49c7-a07a-89702b1c4361" Manufacturer="$(var.Manufacturer)" InstallerVersion="200" />
@@ -93,6 +99,9 @@
         </Component>
         <Component Id="owc473279DC6169D7140DB32234B99BB2BB" Guid="f6143307-7474-3a97-42aa-250ef28429a3">
           <File Id="owf473279DC6169D7140DB32234B99BB2BB" Source="$(var.SourceDir)\SteamKit2.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="owc418CB93F7EC92B98862CA02711BE5C7F" Guid="b47b833c-0858-841b-f285-491d74af0ee4">
+          <File Id="owf418CB93F7EC92B98862CA02711BE5C7F" Source="$(var.SourceDir)\SteamKit2.pdb" KeyPath="yes" />
         </Component>
         <Component Id="owc25FBE4153F32A5634B0ADA8A6954CC89" Guid="6c98bea6-1304-2fb8-4ce3-709ad7fb9601">
           <File Id="owf25FBE4153F32A5634B0ADA8A6954CC89" Source="$(var.SourceDir)\System.AppContext.dll" KeyPath="yes" />
@@ -397,6 +406,12 @@
         <Component Id="owc823C38AF0EE140773F7661CF707A5A8C" Guid="e13968a8-f94d-877d-cdc0-16e19eade6df">
           <File Id="owf823C38AF0EE140773F7661CF707A5A8C" Source="$(var.SourceDir)\toofz.ExceptionRenderer.pdb" KeyPath="yes" />
         </Component>
+        <Component Id="owc9B7FA249C984A9090A483A689F1BF92D" Guid="21fc8963-4876-3bc0-8d29-79bcd5159526">
+          <File Id="owf9B7FA249C984A9090A483A689F1BF92D" Source="$(var.SourceDir)\toofz.FakeDbSet.dll" KeyPath="yes" />
+        </Component>
+        <Component Id="owcA21A1E54C6F57331EF5D9325C85C1E71" Guid="8ff69b2a-e77c-69f9-3402-610b28aaa8ba">
+          <File Id="owfA21A1E54C6F57331EF5D9325C85C1E71" Source="$(var.SourceDir)\toofz.FakeDbSet.pdb" KeyPath="yes" />
+        </Component>
         <Component Id="owc6DBF3F730463E4CD3778833878E38A25" Guid="71ab8460-d5cc-f346-f9d3-ca5d3a3b0d56">
           <File Id="owf6DBF3F730463E4CD3778833878E38A25" Source="$(var.SourceDir)\toofz.NecroDancer.Leaderboards.Data.dll" KeyPath="yes" />
         </Component>
@@ -415,6 +430,27 @@
         <Component Id="owcA7F14B92BF14E49E415FC6F1AC7796A2" Guid="f16a8a22-10ca-5f30-9422-812b051b2353">
           <File Id="owfA7F14B92BF14E49E415FC6F1AC7796A2" Source="$(var.SourceDir)\toofz.Services.pdb" KeyPath="yes" />
         </Component>
+        <Directory Id="owd0C64711E243FE4E29D1B4BF4C9D29858" Name="Data">
+          <Directory Id="owdB0A2BA891FA0D5816C027810646795DB" Name="SteamWebApi">
+            <Directory Id="owdD9257F98D6E11453DB5B75A4E0B89AEE" Name="PlayerSummaries">
+              <Component Id="owc146A3942153E8A1421B94C0A88F617BD" Guid="c966934a-ae3b-3be5-40e2-da47e0d054d2">
+                <File Id="owf146A3942153E8A1421B94C0A88F617BD" Source="$(var.SourceDir)\Data\SteamWebApi\PlayerSummaries\0.json" KeyPath="yes" />
+              </Component>
+              <Component Id="owc150FE424BC29EC140E5AF36055C7E11C" Guid="81243eb9-5d9a-02ff-57ee-cd5de90b3bf0">
+                <File Id="owf150FE424BC29EC140E5AF36055C7E11C" Source="$(var.SourceDir)\Data\SteamWebApi\PlayerSummaries\1.json" KeyPath="yes" />
+              </Component>
+              <Component Id="owc10E35771E2994296BA4F3530953A8AA7" Guid="692b70f9-581e-df0d-2c4c-3bafc95c54d4">
+                <File Id="owf10E35771E2994296BA4F3530953A8AA7" Source="$(var.SourceDir)\Data\SteamWebApi\PlayerSummaries\2.json" KeyPath="yes" />
+              </Component>
+              <Component Id="owcBB8F70C8AB163A2FC435C53FB9ED020F" Guid="aeb97821-ba01-41b2-cff0-4d86f6e95452">
+                <File Id="owfBB8F70C8AB163A2FC435C53FB9ED020F" Source="$(var.SourceDir)\Data\SteamWebApi\PlayerSummaries\3.json" KeyPath="yes" />
+              </Component>
+              <Component Id="owc56F8AA8BBA5FEC0A68232E4E07D5707D" Guid="f4f71446-d6d7-120f-d4f7-f094cf7e067c">
+                <File Id="owf56F8AA8BBA5FEC0A68232E4E07D5707D" Source="$(var.SourceDir)\Data\SteamWebApi\PlayerSummaries\4.json" KeyPath="yes" />
+              </Component>
+            </Directory>
+          </Directory>
+        </Directory>
       </Directory>
     </Directory>
   </Module>
