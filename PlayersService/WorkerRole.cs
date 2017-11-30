@@ -17,9 +17,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : this(settings, telemetryClient, null, null) { }
+        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient)
+            : this(settings, telemetryClient, runOnce: false, kernel: null, log: null) { }
 
-        internal WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient, IKernel kernel, ILog log) : base("players", settings, telemetryClient)
+        internal WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient, bool runOnce, IKernel kernel, ILog log) :
+            base("players", settings, telemetryClient, runOnce)
         {
             kernel = kernel ?? KernelConfig.CreateKernel();
             kernel.Bind<IPlayersSettings>()
