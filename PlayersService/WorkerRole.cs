@@ -8,34 +8,43 @@ using Ninject;
 using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 using toofz.Services;
-using static toofz.NecroDancer.Leaderboards.PlayersService.Util;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
+    using static Util;
+
     internal sealed class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(WorkerRole));
 
-        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : this(settings, telemetryClient, null) { }
+        public WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient) : this(settings, telemetryClient, null, null) { }
 
-        internal WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient, IKernel kernel) : base("players", settings, telemetryClient)
+        internal WorkerRole(IPlayersSettings settings, TelemetryClient telemetryClient, IKernel kernel, ILog log) : base("players", settings, telemetryClient)
         {
-            this.kernel = kernel ?? KernelConfig.CreateKernel(settings, telemetryClient);
+            kernel = kernel ?? KernelConfig.CreateKernel();
+            kernel.Bind<IPlayersSettings>()
+                  .ToConstant(settings);
+            kernel.Bind<TelemetryClient>()
+                  .ToConstant(telemetryClient);
+            this.kernel = kernel;
+
+            this.log = log ?? Log;
         }
 
         private readonly IKernel kernel;
+        private readonly ILog log;
 
         protected override async Task RunAsyncOverride(CancellationToken cancellationToken)
         {
             using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players cycle"))
-            using (new UpdateActivity(Log, "players cycle"))
+            using (new UpdateActivity(log, "players cycle"))
             {
                 try
                 {
                     if (Settings.SteamWebApiKey == null)
                     {
-                        Log.Warn("Using test data for calls to Steam Web API. Set your Steam Web API key to use the actual Steam Web API.");
-                        Log.Warn("Run this application with --help to find out how to set your Steam Web API key.");
+                        log.Warn("Using test data for calls to Steam Web API. Set your Steam Web API key to use the actual Steam Web API.");
+                        log.Warn("Run this application with --help to find out how to set your Steam Web API key.");
                     }
 
                     await UpdatePlayersAsync(cancellationToken).ConfigureAwait(false);
@@ -54,7 +63,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         {
             var worker = kernel.Get<PlayersWorker>();
             using (var operation = TelemetryClient.StartOperation<RequestTelemetry>("Update players"))
-            using (new UpdateActivity(Log, "players"))
+            using (new UpdateActivity(log, "players"))
             {
                 try
                 {
@@ -67,7 +76,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                 catch (HttpRequestStatusException ex)
                 {
                     TelemetryClient.TrackException(ex);
-                    Log.Error("Failed to complete run due to an error.", ex);
+                    log.Error("Failed to complete run due to an error.", ex);
                     operation.Telemetry.Success = false;
                 }
                 catch (Exception) when (FailTelemetry(operation.Telemetry))
@@ -82,14 +91,27 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             }
         }
 
+        #region IDisposable Implementation
+
+        private bool disposed;
+
         protected override void Dispose(bool disposing)
         {
+            if (disposed) { return; }
+
             if (disposing)
             {
-                kernel.Dispose();
+                try
+                {
+                    kernel.Dispose();
+                }
+                catch (Exception) { }
             }
+            disposed = true;
 
             base.Dispose(disposing);
         }
+
+        #endregion
     }
 }

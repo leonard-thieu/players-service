@@ -22,16 +22,11 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         /// Creates the kernel that will manage your application.
         /// </summary>
         /// <returns>The created kernel.</returns>
-        public static IKernel CreateKernel(IPlayersSettings settings, TelemetryClient telemetryClient)
+        public static IKernel CreateKernel()
         {
             var kernel = new StandardKernel();
             try
             {
-                kernel.Bind<IPlayersSettings>()
-                      .ToConstant(settings);
-                kernel.Bind<TelemetryClient>()
-                      .ToConstant(telemetryClient);
-
                 RegisterServices(kernel);
 
                 return kernel;
@@ -53,7 +48,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                   .ToConstant(Log);
 
             kernel.Bind<string>()
-                  .ToMethod(CreateLeaderboardsConnectionString)
+                  .ToMethod(GetLeaderboardsConnectionString)
                   .WhenInjectedInto(typeof(LeaderboardsContext), typeof(LeaderboardsStoreClient));
 
             kernel.Bind<ILeaderboardsContext>()
@@ -91,7 +86,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                   .InScope(c => c);
         }
 
-        private static string CreateLeaderboardsConnectionString(IContext c)
+        private static string GetLeaderboardsConnectionString(IContext c)
         {
             var settings = c.Kernel.Get<IPlayersSettings>();
 
@@ -106,6 +101,14 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
             }
 
             return settings.LeaderboardsConnectionString.Decrypt();
+        }
+
+        private static bool DatabaseContainsPlayers(IRequest r)
+        {
+            using (var db = r.ParentContext.Kernel.Get<LeaderboardsContext>())
+            {
+                return db.Players.Any();
+            }
         }
 
         #region SteamWebApiClient
@@ -145,14 +148,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
         }
 
         #endregion
-
-        private static bool DatabaseContainsPlayers(IRequest r)
-        {
-            using (var db = r.ParentContext.Kernel.Get<LeaderboardsContext>())
-            {
-                return db.Players.Any();
-            }
-        }
 
         private static bool SteamWebApiKeyIsSet(IRequest r)
         {

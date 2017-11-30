@@ -8,10 +8,11 @@ using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using toofz.NecroDancer.Leaderboards.Steam.WebApi;
-using static toofz.NecroDancer.Leaderboards.PlayersService.Util;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
+    using static Util;
+
     internal sealed class PlayersWorker
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
