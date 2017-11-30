@@ -163,15 +163,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
             {
                 // Arrange
                 var players = new List<Player>();
-                mockStoreClient
-                    .Setup(c => c.BulkUpsertAsync(players, cancellationToken))
-                    .ReturnsAsync(players.Count);
+                mockStoreClient.Setup(c => c.BulkUpsertAsync(players, null, cancellationToken)).ReturnsAsync(players.Count);
 
                 // Act
                 await worker.StorePlayersAsync(players, cancellationToken);
 
                 // Assert
-                mockStoreClient.Verify(c => c.BulkUpsertAsync(players, cancellationToken), Times.Once);
+                mockStoreClient.Verify(c => c.BulkUpsertAsync(players, null, cancellationToken), Times.Once);
             }
         }
     }
