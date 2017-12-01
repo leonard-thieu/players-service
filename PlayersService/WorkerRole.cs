@@ -69,7 +69,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (HttpRequestStatusException ex)
+                catch (HttpRequestStatusException ex) when (SteamWebApiClient.IsTransient(ex))
                 {
                     TelemetryClient.TrackException(ex);
                     log.Error("Failed to complete run due to an error.", ex);
