@@ -79,7 +79,7 @@
         </Component>
         <Component Id="owcF2790E5923B0B020D9E2D80974AFD905" Guid="73e30dc5-03a7-11c2-2d80-832abf4094a9">
           <File Id="owfF2790E5923B0B020D9E2D80974AFD905" Source="$(var.SourceDir)\PlayersService.exe" KeyPath="yes" />
-          <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Retrieves player data from Steam." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes">
+          <ServiceInstall Id="si85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" DisplayName="$(var.ProductName)" Description="Updates Crypt of the NecroDancer players for toofz API." ErrorControl="normal" Start="auto" Type="ownProcess" Vital="yes">
             <ServiceConfig xmlns="http://schemas.microsoft.com/wix/UtilExtension" FirstFailureActionType="restart" SecondFailureActionType="restart" ThirdFailureActionType="none" ResetPeriodInDays="1" RestartServiceDelayInSeconds="120" />
           </ServiceInstall>
           <ServiceControl Id="sc85773AFFD5CA35DE4A41AC5DA3D57A58" Name="$(var.ProductName)" Start="install" Stop="both" Remove="both" Wait="yes" />
