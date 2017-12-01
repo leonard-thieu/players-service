@@ -11,8 +11,6 @@ using toofz.NecroDancer.Leaderboards.Steam.WebApi;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
-    using static Util;
-
     internal sealed class PlayersWorker
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(PlayersWorker));
@@ -71,11 +69,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception) when (FailTelemetry(operation.Telemetry))
-                {
-                    // Unreachable
-                    throw;
-                }
+                catch (Exception) when (operation.Telemetry.MarkAsUnsuccessful()) { }
             }
         }
 
@@ -132,11 +126,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
 
                     operation.Telemetry.Success = true;
                 }
-                catch (Exception) when (FailTelemetry(operation.Telemetry))
-                {
-                    // Unreachable
-                    throw;
-                }
+                catch (Exception) when (operation.Telemetry.MarkAsUnsuccessful()) { }
             }
         }
     }

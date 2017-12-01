@@ -124,11 +124,11 @@
     <Compile Include="FakeLeaderboardsStoreClient.cs" />
     <Compile Include="FakeSteamWebApiClient.cs" />
     <Compile Include="KernelConfig.cs" />
+    <Compile Include="OperationTelemetryExtensions.cs" />
     <Compile Include="PlayersArgsParser.cs" />
     <Compile Include="PlayersOptions.cs" />
     <Compile Include="PlayersWorker.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Util.cs" />
     <Compile Include="WorkerRole.cs">
       <SubType>Component</SubType>
     </Compile>
