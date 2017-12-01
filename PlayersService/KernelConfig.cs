@@ -76,7 +76,6 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService
                   .When(SteamWebApiKeyIsSet)
                   .InParentScope()
                   .WithPropertyValue(nameof(SteamWebApiClient.SteamWebApiKey), GetSteamWebApiKey);
-
             kernel.Bind<ISteamWebApiClient>()
                   .To<FakeSteamWebApiClient>()
                   .InParentScope();
