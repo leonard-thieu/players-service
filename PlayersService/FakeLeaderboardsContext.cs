@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
 {
+    [ExcludeFromCodeCoverage]
     internal sealed class FakeLeaderboardsContext : ILeaderboardsContext
     {
         public FakeLeaderboardsContext()
