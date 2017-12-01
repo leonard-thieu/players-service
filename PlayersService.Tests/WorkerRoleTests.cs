@@ -50,11 +50,13 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
                       .InParentScope();
 
                 var log = mockLog.Object;
-                var worker = new WorkerRole(settings, telemetryClient, runOnce, kernel, log);
 
                 // Act
-                worker.Start();
-                await worker.Completion;
+                using (var worker = new WorkerRole(settings, telemetryClient, runOnce, kernel, log))
+                {
+                    worker.Start();
+                    await worker.Completion;
+                }
 
                 // Assert
                 Assert.NotEqual(0, db.Players.Count());
