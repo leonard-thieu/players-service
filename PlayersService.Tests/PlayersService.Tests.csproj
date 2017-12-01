@@ -72,7 +72,7 @@
     <None Include="Resources\GetPlayerSummaries.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseTestsBase.cs" />
+    <Compile Include="IntegrationTestsBase.cs" />
     <Compile Include="PlayersArgsParserTests.cs" />
     <Compile Include="PlayersWorkerTests.cs" />
     <Compile Include="StorageHelper.cs" />
