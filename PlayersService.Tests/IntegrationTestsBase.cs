@@ -34,7 +34,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
 
         internal readonly Settings settings;
         private readonly string settingsFileName;
-        protected readonly string databaseConnectionString = StorageHelper.GetDatabaseConnectionString();
+        protected readonly string databaseConnectionString = StorageHelper.GetDatabaseConnectionString(nameof(LeaderboardsContext));
         protected readonly LeaderboardsContext db;
 
         public void Dispose()
