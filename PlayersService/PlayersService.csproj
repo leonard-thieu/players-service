@@ -65,7 +65,7 @@
       <Version>1.4.1</Version>
     </PackageReference>
     <PackageReference Include="toofz.FakeDbSet">
-      <Version>1.1.0</Version>
+      <Version>1.1.4</Version>
     </PackageReference>
     <PackageReference Include="toofz.NecroDancer.Leaderboards">
       <Version>24.0.4</Version>
