@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using toofz.Data;
 using toofz.Steam.WebApi.ISteamUser;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService
