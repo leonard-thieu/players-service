@@ -10,7 +10,7 @@ using toofz.Steam.WebApi;
 using toofz.Steam.WebApi.ISteamRemoteStorage;
 using toofz.Steam.WebApi.ISteamUser;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     [ExcludeFromCodeCoverage]
     internal sealed class FakeSteamWebApiClient : ISteamWebApiClient

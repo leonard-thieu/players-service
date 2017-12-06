@@ -9,7 +9,7 @@ using toofz.Steam.WebApi;
 using toofz.Steam.WebApi.ISteamUser;
 using Xunit;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
+namespace toofz.Services.PlayersService.Tests
 {
     public class PlayersWorkerTests
     {

@@ -2,7 +2,7 @@
 using System.Configuration;
 using System.Data.Entity.Infrastructure;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
+namespace toofz.Services.PlayersService.Tests
 {
     internal static class StorageHelper
     {

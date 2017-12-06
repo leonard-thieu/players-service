@@ -3,11 +3,10 @@ using System.Configuration;
 using System.Data.Entity;
 using System.IO;
 using toofz.Data;
-using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.Services;
+using toofz.Services.PlayersService.Properties;
 using Xunit;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
+namespace toofz.Services.PlayersService.Tests
 {
     [Trait("Category", "Uses SQL Server")]
     [Trait("Category", "Uses file system")]

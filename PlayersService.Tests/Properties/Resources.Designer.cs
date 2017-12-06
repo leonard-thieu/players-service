@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests.Properties {
+namespace toofz.Services.PlayersService.Tests.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("toofz.NecroDancer.Leaderboards.PlayersService.Tests.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("toofz.Services.PlayersService.Tests.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

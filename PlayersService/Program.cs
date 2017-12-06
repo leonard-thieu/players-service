@@ -2,10 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using log4net;
 using Microsoft.ApplicationInsights;
-using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.Services;
+using toofz.Services.PlayersService.Properties;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     [ExcludeFromCodeCoverage]
     internal static class Program

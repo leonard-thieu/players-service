@@ -7,7 +7,7 @@
     <ProjectGuid>{E8E38ADB-198C-451A-950A-4A18F0BF51A6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>toofz.NecroDancer.Leaderboards.PlayersService.Tests</RootNamespace>
+    <RootNamespace>toofz.Services.PlayersService.Tests</RootNamespace>
     <AssemblyName>PlayersService.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

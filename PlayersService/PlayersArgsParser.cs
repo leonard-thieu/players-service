@@ -2,10 +2,9 @@
 using System.IO;
 using System.Reflection;
 using Mono.Options;
-using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.Services;
+using toofz.Services.PlayersService.Properties;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     internal sealed class PlayersArgsParser : ArgsParser<PlayersOptions, IPlayersSettings>
     {

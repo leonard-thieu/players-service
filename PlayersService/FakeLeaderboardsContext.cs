@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using toofz.Data;
 using toofz.Steam.WebApi.ISteamUser;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     [ExcludeFromCodeCoverage]
     internal sealed class FakeLeaderboardsContext : ILeaderboardsContext

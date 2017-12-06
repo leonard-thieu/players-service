@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="toofz.NecroDancer.Leaderboards.PlayersService.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="toofz.Services.PlayersService.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="UpdateInterval" Description="The minimum amount of time that should pass between each cycle." Type="System.TimeSpan" Scope="User">

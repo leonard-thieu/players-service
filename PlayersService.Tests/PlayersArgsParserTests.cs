@@ -1,10 +1,9 @@
 ﻿using System.IO;
 using Moq;
-using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.Services;
+using toofz.Services.PlayersService.Properties;
 using Xunit;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
+namespace toofz.Services.PlayersService.Tests
 {
     public class PlayersArgsParserTests
     {

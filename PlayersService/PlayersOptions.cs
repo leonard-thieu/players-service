@@ -1,6 +1,4 @@
-﻿using toofz.Services;
-
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+﻿namespace toofz.Services.PlayersService
 {
     internal sealed class PlayersOptions : Options
     {

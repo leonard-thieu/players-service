@@ -6,11 +6,10 @@ using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Ninject;
 using toofz.Data;
-using toofz.NecroDancer.Leaderboards.PlayersService.Properties;
-using toofz.Services;
+using toofz.Services.PlayersService.Properties;
 using toofz.Steam.WebApi;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     internal sealed class WorkerRole : WorkerRoleBase<IPlayersSettings>
     {

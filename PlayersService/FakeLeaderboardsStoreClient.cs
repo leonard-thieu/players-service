@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using toofz.Data;
 
-namespace toofz.NecroDancer.Leaderboards.PlayersService
+namespace toofz.Services.PlayersService
 {
     [ExcludeFromCodeCoverage]
     internal sealed class FakeLeaderboardsStoreClient : ILeaderboardsStoreClient
