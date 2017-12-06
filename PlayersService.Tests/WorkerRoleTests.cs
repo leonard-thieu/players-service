@@ -5,7 +5,7 @@ using log4net;
 using Microsoft.ApplicationInsights;
 using Moq;
 using Ninject.Extensions.NamedScope;
-using toofz.NecroDancer.Leaderboards.Steam.WebApi;
+using toofz.Steam.WebApi;
 using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests

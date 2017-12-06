@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
 using Moq;
-using toofz.NecroDancer.Leaderboards.Steam.WebApi;
-using toofz.NecroDancer.Leaderboards.Steam.WebApi.ISteamUser;
+using toofz.Steam.WebApi;
+using toofz.Steam.WebApi.ISteamUser;
 using Xunit;
 
 namespace toofz.NecroDancer.Leaderboards.PlayersService.Tests
