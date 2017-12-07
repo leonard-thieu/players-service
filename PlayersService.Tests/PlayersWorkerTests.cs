@@ -26,7 +26,7 @@ namespace toofz.Services.PlayersService.Tests
 
         public class Constructor
         {
-            [Fact]
+            [DisplayFact]
             public void ReturnsInstance()
             {
                 // Arrange
@@ -47,7 +47,7 @@ namespace toofz.Services.PlayersService.Tests
         {
             private readonly CancellationToken cancellationToken = CancellationToken.None;
 
-            [Fact]
+            [DisplayFact]
             public async Task ReturnsPlayers()
             {
                 // Arrange
@@ -70,7 +70,7 @@ namespace toofz.Services.PlayersService.Tests
             private int playersPerRequest = 100;
             private readonly CancellationToken cancellationToken = CancellationToken.None;
 
-            [Fact]
+            [DisplayFact]
             public async Task StalePlayersCountGreaterThanPlayersPerRequest_RequestsPlayersInBatches()
             {
                 // Arrange
@@ -95,7 +95,7 @@ namespace toofz.Services.PlayersService.Tests
                 mockSteamWebApiClient.Verify(s => s.GetPlayerSummariesAsync(It.IsAny<IEnumerable<long>>(), It.IsAny<IProgress<long>>(), cancellationToken), Times.Exactly(2));
             }
 
-            [Fact]
+            [DisplayFact]
             public async Task HasMatchingPlayerSummary_UpdatesPlayer()
             {
                 // Arrange
@@ -130,7 +130,7 @@ namespace toofz.Services.PlayersService.Tests
                 Assert.Equal("http://example.org/", player.Avatar);
             }
 
-            [Fact]
+            [DisplayFact]
             public async Task DoesNotHaveMatchingPlayerSummary_MarksPlayerAsNonExistent()
             {
                 // Arrange
@@ -159,7 +159,7 @@ namespace toofz.Services.PlayersService.Tests
             private readonly List<Player> players = new List<Player>();
             private readonly CancellationToken cancellationToken = CancellationToken.None;
 
-            [Fact]
+            [DisplayFact]
             public async Task StoresPlayers()
             {
                 // Arrange

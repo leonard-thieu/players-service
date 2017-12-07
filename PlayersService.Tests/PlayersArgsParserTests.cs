@@ -29,7 +29,7 @@ namespace toofz.Services.PlayersService.Tests
             private Mock<IPlayersSettings> mockSettings = new Mock<IPlayersSettings>();
             private IPlayersSettings settings;
 
-            [Fact]
+            [DisplayFact]
             public void HelpFlagIsSpecified_ShowUsageInformation()
             {
                 // Arrange
@@ -59,7 +59,7 @@ options:
 
             #region PlayersPerUpdate
 
-            [Fact]
+            [DisplayFact(nameof(IPlayersSettings.PlayersPerUpdate))]
             public void PlayersIsSpecified_SetsPlayersPerUpdate()
             {
                 // Arrange
@@ -76,7 +76,7 @@ options:
 
             #region SteamWebApiKey
 
-            [Fact]
+            [DisplayFact(nameof(IPlayersSettings.SteamWebApiKey))]
             public void ApikeyIsSpecified_SetsSteamWebApiKey()
             {
                 // Arrange
@@ -90,7 +90,7 @@ options:
                 Assert.Equal(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
             }
 
-            [Fact]
+            [DisplayFact(nameof(IPlayersSettings.SteamWebApiKey))]
             public void ApikeyFlagIsSpecified_PromptsUserForApikeyAndSetsSteamWebApiKey()
             {
                 // Arrange
@@ -107,7 +107,7 @@ options:
                 Assert.Equal(encrypted.Decrypt(), settings.SteamWebApiKey.Decrypt());
             }
 
-            [Fact]
+            [DisplayFact(nameof(IPlayersSettings.SteamWebApiKey))]
             public void ApikeyFlagIsNotSpecifiedAndSteamWebApiKeyIsSet_DoesNotSetSteamWebApiKey()
             {
                 // Arrange

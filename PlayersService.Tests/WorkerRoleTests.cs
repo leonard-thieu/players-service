@@ -18,7 +18,7 @@ namespace toofz.Services.PlayersService.Tests
             private readonly Mock<ILog> mockLog = new Mock<ILog>();
 
             [Trait("Category", "Uses file system")]
-            [Fact]
+            [DisplayFact]
             public async Task ExecutesUpdateCycle()
             {
                 // Arrange
