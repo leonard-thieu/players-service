@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.EntityFrameworkCore;
 using toofz.Data;
 using toofz.Steam.WebApi;
 
@@ -40,7 +40,7 @@ namespace toofz.Services.PlayersService
             return (from p in db.Players.AsNoTracking()
                     orderby p.LastUpdate
                     select p)
-                    .Take(() => limit)
+                    .Take(limit)
                     .ToListAsync(cancellationToken);
         }
 

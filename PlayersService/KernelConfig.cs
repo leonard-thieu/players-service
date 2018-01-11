@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Data.Entity.Infrastructure;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using log4net;
 using Microsoft.ApplicationInsights;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Ninject;
 using Ninject.Activation;
 using Ninject.Extensions.NamedScope;
@@ -13,12 +15,16 @@ using toofz.Data;
 using toofz.Services.PlayersService.Properties;
 using toofz.Steam;
 using toofz.Steam.WebApi;
+using toofz.Steam.WebApi.ISteamUser;
 
 namespace toofz.Services.PlayersService
 {
     [ExcludeFromCodeCoverage]
     internal static class KernelConfig
     {
+        // The dev database is intended for development and demonstration scenarios.
+        private const string DevDatabaseName = "DevNecroDancer";
+
         private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
 
         /// <summary>
@@ -31,7 +37,6 @@ namespace toofz.Services.PlayersService
             try
             {
                 RegisterServices(kernel);
-
                 return kernel;
             }
             catch
@@ -52,23 +57,17 @@ namespace toofz.Services.PlayersService
 
             kernel.Bind<string>()
                   .ToMethod(GetLeaderboardsConnectionString)
-                  .WhenInjectedInto(typeof(LeaderboardsContext), typeof(LeaderboardsStoreClient));
-
+                  .WhenInjectedInto(typeof(NecroDancerContextOptionsBuilder), typeof(LeaderboardsStoreClient))
+                  .InScope(c => UpdateCycleScope.Instance);
+            kernel.Bind<DbContextOptionsBuilder<NecroDancerContext>>()
+                  .To<NecroDancerContextOptionsBuilder>();
+            kernel.Bind<DbContextOptions<NecroDancerContext>>()
+                  .ToMethod(GetNecroDancerContextOptions);
             kernel.Bind<ILeaderboardsContext>()
-                  .To<LeaderboardsContext>()
-                  .When(DatabaseContainsPlayers)
-                  .InParentScope();
-            kernel.Bind<ILeaderboardsContext>()
-                  .To<FakeLeaderboardsContext>()
-                  .InParentScope();
-
-            kernel.Bind<ILeaderboardsStoreClient>()
-                  .To<LeaderboardsStoreClient>()
-                  .When(SteamWebApiKeyIsSet)
-                  .InParentScope();
-            kernel.Bind<ILeaderboardsStoreClient>()
-                  .To<FakeLeaderboardsStoreClient>()
-                  .InParentScope();
+                  .To<NecroDancerContext>()
+                  .InParentScope()
+                  .OnActivation(InitializeNecroDancerContext)
+                  .OnActivation(EnsureDevSeedData);
 
             kernel.Bind<HttpMessageHandler>()
                   .ToMethod(GetSteamWebApiClientHandler)
@@ -81,37 +80,96 @@ namespace toofz.Services.PlayersService
                   .WithPropertyValue(nameof(SteamWebApiClient.SteamWebApiKey), GetSteamWebApiKey);
             kernel.Bind<ISteamWebApiClient>()
                   .To<FakeSteamWebApiClient>()
+                  .InParentScope()
+                  .OnActivation(WarnUsingTestDataForSteamWebApi);
+
+            kernel.Bind<ILeaderboardsStoreClient>()
+                  .To<LeaderboardsStoreClient>()
                   .InParentScope();
 
             kernel.Bind<PlayersWorker>()
                   .ToSelf()
-                  .InScope(c => c);
+                  .InScope(c => UpdateCycleScope.Instance)
+                  .OnDeactivation(_ => UpdateCycleScope.Instance = new object());
         }
+
+        #region Database
 
         private static string GetLeaderboardsConnectionString(IContext c)
         {
             var settings = c.Kernel.Get<IPlayersSettings>();
 
-            if (settings.LeaderboardsConnectionString == null)
+            // If SteamWebApiKey is not set, use the dev database as test data will be returned from Steam Web API.
+            if (settings.SteamWebApiKey == null)
             {
-                var connectionFactory = new LocalDbConnectionFactory("mssqllocaldb");
-                using (var connection = connectionFactory.CreateConnection("NecroDancer"))
+                return StorageHelper.GetLocalDbConnectionString(DevDatabaseName);
+            }
+
+            // Get the connection string from settings if it's available; otherwise, use the default.
+            var connectionString = settings.LeaderboardsConnectionString?.Decrypt() ??
+                                   StorageHelper.GetLocalDbConnectionString("NecroDancer");
+
+            // Check if any players are in the database. If there are none (i.e. toofz Leaderboards Service hasn't been run),
+            // use the dev database instead as it will be seeded with test data.
+            var options = new DbContextOptionsBuilder<NecroDancerContext>()
+                .UseSqlServer(connectionString)
+                .Options;
+
+            using (var context = new NecroDancerContext(options))
+            {
+                InitializeNecroDancerContext(context);
+
+                if (!context.Players.Any())
                 {
-                    settings.LeaderboardsConnectionString = new EncryptedSecret(connection.ConnectionString, settings.KeyDerivationIterations);
-                    settings.Save();
+                    var log = c.Kernel.Get<ILog>();
+
+                    log.Warn("No players exist in target database.");
+                    log.Warn("Using dev database with test data.");
+                    log.Warn("Run toofz Leaderboards Service to update the database.");
+
+                    connectionString = StorageHelper.GetLocalDbConnectionString(DevDatabaseName);
                 }
             }
 
-            return settings.LeaderboardsConnectionString.Decrypt();
+            return connectionString;
         }
 
-        private static bool DatabaseContainsPlayers(IRequest r)
+        private static DbContextOptions<NecroDancerContext> GetNecroDancerContextOptions(IContext c)
         {
-            using (var db = r.ParentContext.Kernel.Get<LeaderboardsContext>())
+            return c.Kernel.Get<NecroDancerContextOptionsBuilder>().Options;
+        }
+
+        private static void InitializeNecroDancerContext(NecroDancerContext context)
+        {
+            context.Database.Migrate();
+        }
+
+        private static void EnsureDevSeedData(NecroDancerContext context)
+        {
+            if (context.Database.GetDbConnection().Database == DevDatabaseName)
             {
-                return db.Players.Any();
+                if (!context.Players.Any())
+                {
+                    var playerSummariesPath = Path.Combine("Data", "SteamWebApi", "PlayerSummaries");
+                    var playerSummariesFiles = Directory.GetFiles(playerSummariesPath, "*.json");
+
+                    foreach (var playerSummariesFile in playerSummariesFiles)
+                    {
+                        using (var sr = File.OpenText(playerSummariesFile))
+                        {
+                            var playerSummaries = JsonConvert.DeserializeObject<PlayerSummariesEnvelope>(sr.ReadToEnd());
+                            var players = from p in playerSummaries.Response.Players
+                                          select new Player { SteamId = p.SteamId };
+                            context.Players.AddRange(players);
+                        }
+                    }
+
+                    context.SaveChanges();
+                }
             }
         }
+
+        #endregion
 
         #region SteamWebApiClient
 
@@ -144,16 +202,38 @@ namespace toofz.Services.PlayersService
             });
         }
 
+        private static bool SteamWebApiKeyIsSet(IRequest r)
+        {
+            return r.ParentContext.Kernel.Get<IPlayersSettings>().SteamWebApiKey != null;
+        }
+
         private static string GetSteamWebApiKey(IContext c)
         {
             return c.Kernel.Get<IPlayersSettings>().SteamWebApiKey.Decrypt();
         }
 
+        private static void WarnUsingTestDataForSteamWebApi(IContext c, FakeSteamWebApiClient _)
+        {
+            var log = c.Kernel.Get<ILog>();
+
+            log.Warn("Steam Web API key is not set.");
+            log.Warn("Using test data for calls to Steam Web API.");
+            log.Warn("Run this application with --help to find out how to set your Steam Web API key.");
+        }
+
         #endregion
 
-        private static bool SteamWebApiKeyIsSet(IRequest r)
+        private sealed class UpdateCycleScope
         {
-            return r.ParentContext.Kernel.Get<IPlayersSettings>().SteamWebApiKey != null;
+            public static object Instance { get; set; } = new object();
+        }
+    }
+
+    internal sealed class NecroDancerContextOptionsBuilder : DbContextOptionsBuilder<NecroDancerContext>
+    {
+        public NecroDancerContextOptionsBuilder(string connectionString)
+        {
+            this.UseSqlServer(connectionString);
         }
     }
 }

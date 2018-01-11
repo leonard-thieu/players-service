@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using toofz.Data;
 using toofz.Steam.WebApi;
@@ -15,14 +16,19 @@ namespace toofz.Services.PlayersService.Tests
     {
         public PlayersWorkerTests()
         {
-            worker = new PlayersWorker(mockDb.Object, mockSteamWebApiClient.Object, mockStoreClient.Object, telemetryClient);
+            var context = new NecroDancerContext(necroDancerContextOptions);
+
+            worker = new PlayersWorker(context, mockSteamWebApiClient.Object, mockStoreClient.Object, telemetryClient);
         }
 
-        private readonly PlayersWorker worker;
-        private readonly Mock<ILeaderboardsContext> mockDb = new Mock<ILeaderboardsContext>();
         private readonly Mock<ISteamWebApiClient> mockSteamWebApiClient = new Mock<ISteamWebApiClient>();
         private readonly Mock<ILeaderboardsStoreClient> mockStoreClient = new Mock<ILeaderboardsStoreClient>();
         private readonly TelemetryClient telemetryClient = new TelemetryClient();
+        private readonly PlayersWorker worker;
+
+        private readonly DbContextOptions<NecroDancerContext> necroDancerContextOptions = new DbContextOptionsBuilder<NecroDancerContext>()
+            .UseInMemoryDatabase(databaseName: Constants.NecroDancerContextName)
+            .Options;
 
         public class Constructor
         {
@@ -51,9 +57,6 @@ namespace toofz.Services.PlayersService.Tests
             public async Task ReturnsPlayers()
             {
                 // Arrange
-                var dbPlayersInner = new List<Player>();
-                var dbPlayers = new FakeDbSet<Player>(dbPlayersInner);
-                mockDb.Setup(d => d.Players).Returns(dbPlayers);
                 var limit = 100;
 
                 // Act
