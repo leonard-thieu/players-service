@@ -25,7 +25,7 @@ build:
   
 test_script:
   - ps: |
-      $projectPath = Resolve-Path .\PlayersService.Tests\PlayersService.Tests.csproj
+      $projectPath = Resolve-Path .\test\PlayersService.Tests\PlayersService.Tests.csproj
       msbuild $projectPath /nologo /verbosity:minimal `
           /target:Build `
           /target:Test `
@@ -33,7 +33,7 @@ test_script:
           /property:DebugType=full
       
 artifacts:
-  - path: \Installer\bin\$(Configuration)\*.msi
+  - path: \src\Installer\bin\$(Configuration)\*.msi
     name: PlayersService
 
 deploy:
