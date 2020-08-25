@@ -31,7 +31,7 @@
     <PackageReference Include="toofz.Data" Version="10.0.4" />
     <PackageReference Include="toofz.ExceptionRenderer" Version="1.5.3" />
     <PackageReference Include="toofz.Services" Version="15.0.10" />
-    <PackageReference Include="toofz.Steam" Version="26.0.4" />
+    <PackageReference Include="toofz.Steam" Version="27.0.0" />
   </ItemGroup>
 
   <ItemGroup>
