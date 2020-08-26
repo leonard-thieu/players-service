@@ -30,7 +30,8 @@ test_script:
           /target:Rebuild `
           /target:Test `
           /property:Configuration=Coverage `
-          /property:DebugType=full
+          /property:DebugType=full `
+          /property:PublishCoverage=false
       
 artifacts:
   - path: \src\Installer\bin\$(Configuration)\*.msi
