@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Package</OutputType>
     <FileVersion Condition="'$(FileVersion)' == ''">0.0.0</FileVersion>
-    <OutputName>toofz-replays-service-v$(FileVersion)</OutputName>
+    <OutputName>toofz-players-service-v$(FileVersion)</OutputName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
