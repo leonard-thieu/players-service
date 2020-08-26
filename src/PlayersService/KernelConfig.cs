@@ -141,7 +141,7 @@ namespace toofz.Services.PlayersService
 
         private static void InitializeNecroDancerContext(NecroDancerContext context)
         {
-            context.Database.Migrate();
+            //context.Database.Migrate();
             context.EnsureSeedData();
         }
 
